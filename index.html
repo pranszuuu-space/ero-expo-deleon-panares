@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elementary Row Operations — Exponential Systems Solver</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   PHOSPHOR TERMINAL — ELEMENTARY ROW OPS
+   Green on black. Retro sci-fi. Sharp & geometric.
+═══════════════════════════════════════════ */
+:root{
+  --bg:#020905;
+  --surface:#050e07;
+  --surface2:#081209;
+  --surface3:#0a160b;
+  --border:#0d2b10;
+  --border2:#144018;
+  --ph:#00ff41;          /* phosphor green */
+  --ph2:#00cc33;         /* dimmer green */
+  --ph3:#39ff14;         /* bright neon */
+  --ph-dim:#004d14;      /* very dim green */
+  --ph-glow:rgba(0,255,65,0.12);
+  --amber:#ffb000;       /* amber accent */
+  --red:#ff2222;         /* error red */
+  --text:#b8ffca;
+  --text2:#4dcc6b;
+  --muted:#1a5c27;
+  --success:#00ff41;
+  --error:#ff2222;
+  --gold:#ffb000;
+  --accent:var(--ph);
+  --accent2:var(--amber);
+  --accent3:#00e5ff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Exo 2',sans-serif;
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* scanline overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+}
+
+/* ── CONSTELLATION ── */
+#constellation{position:fixed;inset:0;z-index:0;pointer-events:none;/* aurora canvas */}
+
+/* ── PAGE ── */
+.page{position:relative;z-index:3;max-width:1300px;margin:0 auto;padding:40px 28px 90px;}
+
+/* ── HEADER ── */
+header{text-align:center;margin-bottom:52px;padding-top:16px;}
+.badge-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,255,65,0.06);border:1px solid rgba(0,255,65,0.25);
+  color:var(--ph2);font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  padding:5px 14px;border-radius:2px;
+  text-shadow:0 0 8px rgba(0,255,65,0.4);
+}
+.badge.purple{
+  background:rgba(255,176,0,0.06);border-color:rgba(255,176,0,0.25);
+  color:var(--amber);text-shadow:0 0 8px rgba(255,176,0,0.4);
+}
+.badge.teal{
+  background:rgba(0,229,255,0.06);border-color:rgba(0,229,255,0.25);
+  color:var(--accent3);text-shadow:0 0 8px rgba(0,229,255,0.4);
+}
+
+/* Blinking cursor before title */
+.term-prompt{
+  font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--ph2);
+  letter-spacing:2px;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.term-prompt::before{content:'> ';color:var(--ph);text-shadow:0 0 10px var(--ph);}
+.cursor-blink{
+  display:inline-block;width:10px;height:16px;background:var(--ph);
+  animation:blink .8s step-end infinite;vertical-align:middle;margin-left:4px;
+  box-shadow:0 0 8px var(--ph);
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+h1{
+  font-family:'Orbitron',sans-serif;font-weight:700;
+  font-size:clamp(1.6rem,4.5vw,3.2rem);line-height:1.1;
+  color:var(--ph);letter-spacing:0.06em;margin-bottom:10px;
+  text-shadow:0 0 20px rgba(0,255,65,0.6),0 0 40px rgba(0,255,65,0.2);
+}
+h1 em{
+  font-style:normal;font-weight:400;font-size:0.62em;
+  color:var(--ph2);display:block;letter-spacing:0.1em;
+  text-shadow:0 0 12px rgba(0,255,65,0.3);
+}
+.subtitle{
+  font-family:'Share Tech Mono',monospace;
+  color:var(--text2);font-size:12px;letter-spacing:1px;
+  max-width:620px;margin:0 auto;line-height:1.8;
+  text-shadow:0 0 6px rgba(0,204,51,0.3);
+}
+.term-line{
+  width:100%;max-width:500px;height:1px;margin:22px auto 0;
+  background:linear-gradient(90deg,transparent,var(--ph2),transparent);
+  box-shadow:0 0 8px rgba(0,255,65,0.3);
+}
+
+/* ── CARD ── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:4px;
+  padding:26px;position:relative;overflow:hidden;
+  transition:border-color .3s,box-shadow .3s;
+  box-shadow:inset 0 0 30px rgba(0,255,65,0.02);
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,65,0.4),transparent);
+  opacity:0.6;
+}
+.card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,65,0.15),transparent);
+}
+.card:hover{
+  border-color:rgba(0,255,65,0.2);
+  box-shadow:0 0 30px rgba(0,255,65,0.05),inset 0 0 30px rgba(0,255,65,0.03);
+}
+
+/* Corner decorations */
+.card::before{
+  content:'';position:absolute;top:0;left:0;
+  width:12px;height:12px;
+  border-top:1px solid var(--ph2);
+  border-left:1px solid var(--ph2);
+  opacity:0.6;
+}
+/* Can't use both ::before and ::after for corners, so just top line */
+
+.card-title{
+  font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;
+  letter-spacing:4px;text-transform:uppercase;
+  color:var(--ph);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+  text-shadow:0 0 10px rgba(0,255,65,0.5);
+}
+.card-title::before{content:'//';color:var(--ph-dim);font-family:'Share Tech Mono',monospace;font-size:10px;}
+.card-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--ph2);
+  margin-bottom:14px;display:flex;align-items:center;gap:10px;
+}
+.sec-lbl::before{content:'>';color:var(--ph);margin-right:2px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+
+/* ── LAYOUT ── */
+.how-section{margin-bottom:22px;}
+.top-section{display:grid;grid-template-columns:440px 1fr;gap:20px;margin-bottom:20px;align-items:start;}
+@media(max-width:980px){.top-section{grid-template-columns:1fr;}}
+
+/* ── OP CARDS ── */
+.ops-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+@media(max-width:860px){.ops-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.ops-row{grid-template-columns:1fr;}}
+.op-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:3px;padding:16px;position:relative;
+  transition:border-color .2s,box-shadow .2s;
+  border-left:2px solid var(--ph-dim);
+}
+.op-card:hover{
+  border-left-color:var(--ph2);
+  box-shadow:0 0 20px rgba(0,255,65,0.06);
+  border-color:rgba(0,255,65,0.15);
+}
+.op-num{
+  font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;
+  color:rgba(0,255,65,0.05);
+  position:absolute;top:6px;right:10px;line-height:1;user-select:none;
+}
+.op-icon{font-size:1.2rem;margin-bottom:7px;filter:hue-rotate(120deg);}
+.op-title{
+  font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--ph);margin-bottom:7px;
+  text-shadow:0 0 8px rgba(0,255,65,0.4);
+}
+.op-body{font-size:12px;color:var(--text2);line-height:1.65;font-family:'Exo 2',sans-serif;}
+.op-formula{
+  display:inline-block;
+  background:rgba(0,255,65,0.05);
+  border:1px solid rgba(0,255,65,0.2);
+  border-radius:2px;padding:3px 10px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;color:var(--amber);margin-top:7px;
+  text-shadow:0 0 6px rgba(255,176,0,0.4);
+}
+
+/* ── INPUTS ── */
+label{
+  display:block;font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:var(--text2);letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:6px;
+}
+input[type=text],input[type=number],select{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:2px;
+  color:var(--ph);font-family:'Share Tech Mono',monospace;font-size:13px;
+  padding:11px 13px;margin-bottom:16px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+  caret-color:var(--ph);
+}
+input:focus,select:focus{
+  border-color:var(--ph2);
+  box-shadow:0 0 0 2px rgba(0,255,65,0.1),0 0 15px rgba(0,255,65,0.08);
+}
+input::placeholder{color:var(--muted);font-size:11px;}
+select{cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300cc33' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;}
+.hint{font-size:11px;color:var(--muted);margin-top:-12px;margin-bottom:14px;font-style:normal;
+  line-height:1.6;font-family:'Share Tech Mono',monospace;letter-spacing:0.3px;}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:600px){.row-2,.row-3{grid-template-columns:1fr;}}
+
+/* ── INPUT TABS ── */
+.input-tabs{
+  display:flex;gap:2px;background:var(--surface2);
+  padding:3px;border-radius:3px;margin-bottom:18px;
+  border:1px solid var(--border);
+}
+.itab{
+  flex:1;padding:9px 12px;border:none;background:transparent;
+  color:var(--muted);font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;border-radius:2px;transition:all .2s;
+}
+.itab.active{
+  background:rgba(0,255,65,0.08);color:var(--ph);
+  border:1px solid rgba(0,255,65,0.2);
+  text-shadow:0 0 8px rgba(0,255,65,0.4);
+}
+.input-panel{display:none;}.input-panel.active{display:block;}
+
+/* ── MATRIX BUILDER ── */
+.matrix-controls{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.size-btn{
+  width:28px;height:28px;border-radius:2px;
+  background:var(--surface2);border:1px solid var(--border2);
+  color:var(--ph2);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;font-family:'Share Tech Mono',monospace;line-height:1;
+}
+.size-btn:hover{
+  border-color:var(--ph2);color:var(--ph);
+  background:rgba(0,255,65,0.08);
+  box-shadow:0 0 10px rgba(0,255,65,0.15);
+}
+.size-display{
+  font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--ph);
+  background:rgba(0,255,65,0.06);border:1px solid rgba(0,255,65,0.2);
+  border-radius:2px;padding:5px 12px;letter-spacing:2px;
+  text-shadow:0 0 6px rgba(0,255,65,0.3);
+}
+.matrix-grid{display:inline-grid;gap:6px;margin-bottom:14px;}
+.matrix-cell{
+  width:56px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:2px;
+  color:var(--ph);font-family:'Share Tech Mono',monospace;
+  font-size:12px;padding:8px 4px;text-align:center;outline:none;
+  transition:border-color .2s,box-shadow .2s;caret-color:var(--ph);
+}
+.matrix-cell:focus{
+  border-color:var(--ph2);
+  box-shadow:0 0 0 2px rgba(0,255,65,0.1),0 0 10px rgba(0,255,65,0.1);
+}
+.matrix-cell.rhs{
+  border-color:rgba(255,176,0,0.3);background:rgba(255,176,0,0.04);
+  color:var(--amber);
+}
+.matrix-cell.rhs:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(255,176,0,0.1);}
+.matrix-cell::placeholder{color:var(--muted);font-size:10px;}
+.matrix-wrap{overflow-x:auto;padding-bottom:6px;}
+
+.aug-line{
+  width:1px;
+  background:linear-gradient(180deg,transparent,rgba(0,255,65,0.5),transparent);
+  margin:0 6px;flex-shrink:0;align-self:stretch;min-height:20px;
+  box-shadow:0 0 4px rgba(0,255,65,0.2);
+}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.chip{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:2px;padding:5px 12px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap;
+  letter-spacing:1px;
+}
+.chip:hover{border-color:var(--ph2);color:var(--ph);background:rgba(0,255,65,0.07);}
+.chip.active{
+  border-color:var(--ph2);color:var(--ph);
+  background:rgba(0,255,65,0.1);
+  text-shadow:0 0 6px rgba(0,255,65,0.4);
+  box-shadow:0 0 8px rgba(0,255,65,0.1);
+}
+
+/* ── BUTTONS ── */
+.btn-primary{
+  width:100%;padding:15px;
+  background:transparent;
+  border:1px solid var(--ph2);border-radius:3px;
+  color:var(--ph);font-family:'Orbitron',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:all .2s;
+  text-shadow:0 0 10px rgba(0,255,65,0.5);
+  box-shadow:0 0 15px rgba(0,255,65,0.1),inset 0 0 15px rgba(0,255,65,0.04);
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,255,65,0.08),transparent);
+}
+.btn-primary:hover{
+  background:rgba(0,255,65,0.08);
+  border-color:var(--ph);
+  box-shadow:0 0 25px rgba(0,255,65,0.2),inset 0 0 20px rgba(0,255,65,0.06);
+  transform:translateY(-1px);
+}
+.btn-primary:active{transform:translateY(0);}
+.btn-steps{
+  display:flex;align-items:center;gap:10px;justify-content:center;
+  width:100%;padding:14px;
+  background:rgba(255,176,0,0.05);
+  border:1px solid rgba(255,176,0,0.3);border-radius:3px;
+  color:var(--amber);font-family:'Orbitron',sans-serif;
+  font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;margin-top:12px;
+  text-shadow:0 0 8px rgba(255,176,0,0.4);
+}
+.btn-steps:hover{
+  background:rgba(255,176,0,0.1);border-color:rgba(255,176,0,0.6);
+  box-shadow:0 0 20px rgba(255,176,0,0.12);transform:translateY(-1px);
+}
+
+/* ── EQUATION INPUT ── */
+.eq-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.eq-input{
+  flex:1;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:2px;color:var(--ph);
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  padding:10px 12px;outline:none;transition:border-color .2s;
+  caret-color:var(--ph);
+}
+.eq-input:focus{border-color:var(--ph2);box-shadow:0 0 8px rgba(0,255,65,0.08);}
+.eq-input::placeholder{color:var(--muted);}
+.eq-sep{color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:13px;flex-shrink:0;}
+.eq-del{
+  width:28px;height:28px;border-radius:2px;background:transparent;
+  border:1px solid var(--muted);color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;transition:all .2s;
+}
+.eq-del:hover{border-color:var(--error);color:var(--error);background:rgba(255,34,34,0.06);}
+.btn-add-eq{
+  width:100%;padding:9px;background:transparent;
+  border:1px dashed var(--border2);border-radius:3px;
+  color:var(--text2);font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:1px;cursor:pointer;transition:all .2s;margin-top:4px;
+}
+.btn-add-eq:hover{border-color:var(--ph2);color:var(--ph);}
+
+/* ── RESULTS ── */
+#results{display:none;}
+
+.answer-banner{
+  background:var(--surface);
+  border:1px solid rgba(0,255,65,0.25);
+  border-radius:4px;padding:28px 32px;margin-bottom:18px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.answer-banner::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(0,255,65,0.07) 0%,transparent 65%);
+}
+.answer-banner::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--ph),transparent);
+  box-shadow:0 0 10px rgba(0,255,65,0.4);
+}
+.answer-tag{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--ph);margin-bottom:14px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  text-shadow:0 0 10px rgba(0,255,65,0.5);
+}
+.answer-tag::before{content:'[ ';color:var(--ph-dim);}
+.answer-tag::after{content:' ]';color:var(--ph-dim);}
+
+.solution-vars{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-bottom:10px;}
+.sol-var{
+  background:var(--surface2);
+  border:1px solid rgba(0,255,65,0.2);
+  border-radius:3px;padding:12px 20px;text-align:center;min-width:100px;
+  box-shadow:0 0 15px rgba(0,255,65,0.05);
+}
+.sol-var-name{
+  font-family:'Share Tech Mono',monospace;font-size:8px;
+  color:var(--text2);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;
+}
+.sol-var-val{
+  font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:700;
+  color:var(--ph);text-shadow:0 0 15px rgba(0,255,65,0.5);
+}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+@media(max-width:700px){.stats-row{grid-template-columns:1fr 1fr;}}
+.stat-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:3px;padding:16px;text-align:center;
+  transition:border-color .2s,box-shadow .2s;
+  border-top:1px solid var(--border2);
+}
+.stat-box:hover{
+  border-color:rgba(0,255,65,0.2);
+  box-shadow:0 0 15px rgba(0,255,65,0.06);
+}
+.stat-val{
+  font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:700;
+  color:var(--ph);margin-bottom:4px;
+  text-shadow:0 0 12px rgba(0,255,65,0.4);
+}
+.stat-name{
+  font-family:'Share Tech Mono',monospace;font-size:8px;
+  color:var(--muted);letter-spacing:2px;text-transform:uppercase;
+}
+
+/* ── MATRIX DISPLAY ── */
+.matrix-section{margin-bottom:20px;}
+.matrices-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:760px){.matrices-row{grid-template-columns:1fr;}}
+.matrix-display-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:4px;padding:20px;
+  border-left:2px solid var(--ph-dim);
+}
+.matrix-display-title{
+  font-family:'Share Tech Mono',monospace;font-size:8px;
+  color:var(--ph2);letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.matrix-display-title::before{content:'>>  ';color:var(--ph-dim);}
+.matrix-display-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+
+.aug-matrix{display:inline-flex;align-items:center;gap:0;position:relative;}
+.aug-matrix .bracket-l,.aug-matrix .bracket-r{
+  font-size:2.5em;color:rgba(0,255,65,0.3);line-height:1;
+  font-family:'Share Tech Mono',monospace;padding:0 4px;
+}
+.matrix-cols{display:flex;gap:0;}
+.matrix-col{display:flex;flex-direction:column;gap:5px;}
+.matrix-entry{
+  width:72px;text-align:center;font-family:'Share Tech Mono',monospace;
+  font-size:12px;color:var(--text);padding:5px 4px;border-radius:2px;
+  transition:background .2s;
+}
+.matrix-entry.pivot{color:var(--amber);font-weight:700;text-shadow:0 0 6px rgba(255,176,0,0.4);}
+.matrix-entry.zero{color:var(--muted);}
+.matrix-entry.modified{background:rgba(0,255,65,0.08);color:var(--ph);}
+.aug-sep-col{
+  width:1px;background:linear-gradient(180deg,transparent,rgba(0,255,65,0.4),transparent);
+  margin:0 8px;align-self:stretch;
+}
+
+/* ── STEP LIST ── */
+.steps-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:4px;overflow:hidden;margin-bottom:18px;
+}
+.steps-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+}
+.steps-title{
+  font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;
+  color:var(--ph);letter-spacing:3px;text-transform:uppercase;
+  text-shadow:0 0 8px rgba(0,255,65,0.4);
+}
+.step-list{padding:4px 0;}
+.step-item{
+  display:flex;align-items:flex-start;gap:14px;padding:14px 20px;
+  border-bottom:1px solid rgba(13,43,16,0.8);transition:background .15s;cursor:pointer;
+}
+.step-item:last-child{border-bottom:none;}
+.step-item:hover{background:rgba(0,255,65,0.03);}
+.step-item.active-step{background:rgba(0,255,65,0.04);border-left:2px solid var(--ph2);}
+.step-badge{
+  flex-shrink:0;width:28px;height:28px;border-radius:2px;
+  background:rgba(0,255,65,0.1);border:1px solid rgba(0,255,65,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--ph);
+  text-shadow:0 0 6px rgba(0,255,65,0.4);
+}
+.step-content{flex:1;}
+.step-op{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  color:var(--amber);margin-bottom:4px;
+  text-shadow:0 0 6px rgba(255,176,0,0.3);
+}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.6;font-family:'Exo 2',sans-serif;}
+.step-matrix-preview{margin-top:10px;overflow-x:auto;}
+
+/* ── TABS ── */
+.tabs-bar{
+  display:flex;gap:2px;background:var(--surface2);
+  padding:4px;border-radius:3px;margin-bottom:16px;
+  border:1px solid var(--border);
+}
+.tab{
+  flex:1;padding:8px 12px;border:none;background:transparent;
+  color:var(--muted);font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;border-radius:2px;transition:all .2s;
+}
+.tab.active{
+  background:rgba(0,255,65,0.07);color:var(--ph);
+  border:1px solid rgba(0,255,65,0.2);
+  text-shadow:0 0 6px rgba(0,255,65,0.3);
+}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+
+/* ── ERROR ── */
+.error-box{
+  background:rgba(255,34,34,0.06);border:1px solid rgba(255,34,34,0.3);
+  color:#ff8888;border-radius:3px;padding:12px 16px;
+  font-size:12px;margin-bottom:16px;display:none;line-height:1.6;
+  font-family:'Share Tech Mono',monospace;letter-spacing:0.3px;
+}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:1000;background:rgba(0,2,1,0.92);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:40px 20px;overflow-y:auto;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:#030a04;border:1px solid rgba(0,255,65,0.2);border-radius:4px;
+  width:100%;max-width:900px;overflow:hidden;position:relative;
+  box-shadow:0 0 80px rgba(0,255,65,0.08),0 40px 100px rgba(0,0,0,0.8);
+  animation:terminalIn .25s ease both;
+}
+@keyframes terminalIn{
+  from{opacity:0;transform:translateY(24px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.modal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--ph),transparent);
+  box-shadow:0 0 10px rgba(0,255,65,0.4);
+}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 28px 16px;border-bottom:1px solid var(--border);
+  background:rgba(0,255,65,0.03);
+}
+.modal-title{
+  font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;
+  color:var(--amber);display:flex;align-items:center;gap:12px;
+  text-shadow:0 0 12px rgba(255,176,0,0.4);letter-spacing:2px;
+}
+.modal-close{
+  width:32px;height:32px;border-radius:2px;
+  background:transparent;border:1px solid var(--border2);
+  color:var(--text2);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+  font-family:'Share Tech Mono',monospace;
+}
+.modal-close:hover{
+  background:rgba(255,34,34,0.1);border-color:rgba(255,34,34,0.4);color:var(--error);
+}
+.modal-body{padding:24px 28px 36px;max-height:78vh;overflow-y:auto;}
+.modal-body::-webkit-scrollbar{width:3px;}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* Solution modal content */
+.msec{margin-bottom:28px;}
+.msec-title{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--ph2);
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.msec-title::before{content:'// ';color:var(--ph-dim);}
+.msec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+
+.answer-box-modal{
+  background:rgba(0,255,65,0.04);
+  border:1px solid rgba(0,255,65,0.2);
+  border-radius:3px;padding:20px 22px;text-align:center;margin-bottom:18px;
+  box-shadow:0 0 20px rgba(0,255,65,0.04);
+}
+.answer-box-modal-label{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--ph);margin-bottom:12px;
+  text-shadow:0 0 8px rgba(0,255,65,0.4);
+}
+.answer-box-modal-vars{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:8px;}
+.abm-var{
+  background:var(--surface2);border:1px solid rgba(0,255,65,0.15);
+  border-radius:2px;padding:10px 16px;
+}
+.abm-var-name{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text2);letter-spacing:2px;}
+.abm-var-val{
+  font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;
+  color:var(--ph);text-shadow:0 0 10px rgba(0,255,65,0.4);
+}
+
+.mstep{
+  background:var(--surface2);border:1px solid var(--border);
+  border-left:2px solid var(--border2);
+  border-radius:2px;padding:16px 18px;margin-bottom:10px;transition:border-color .2s;
+}
+.mstep:hover{border-left-color:var(--ph-dim);}
+.mstep-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.mstep-num{
+  flex-shrink:0;width:28px;height:28px;border-radius:2px;
+  background:rgba(0,255,65,0.1);border:1px solid rgba(0,255,65,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--ph);
+  text-shadow:0 0 6px rgba(0,255,65,0.4);
+}
+.mstep-title{font-size:13px;font-weight:500;color:var(--text);padding-top:4px;font-family:'Exo 2',sans-serif;}
+.mstep-body{font-size:12px;color:var(--text2);line-height:1.8;padding-left:40px;font-family:'Exo 2',sans-serif;}
+.mstep-body code{
+  background:rgba(0,255,65,0.07);border:1px solid rgba(0,255,65,0.15);
+  border-radius:2px;padding:1px 7px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--amber);
+  text-shadow:0 0 4px rgba(255,176,0,0.3);
+}
+.mstep-body .hl{color:var(--ph);font-weight:600;text-shadow:0 0 6px rgba(0,255,65,0.3);}
+.mstep-body .gr{color:var(--ph);font-weight:600;}
+.mstep-matrix{margin-top:10px;overflow-x:auto;padding-left:40px;}
+
+.mini-matrix{display:inline-flex;align-items:center;gap:0;}
+.mini-matrix .br{
+  font-size:1.6em;color:rgba(0,255,65,0.3);
+  font-family:'Share Tech Mono',monospace;padding:0 3px;
+}
+.mini-cols{display:flex;gap:0;}
+.mini-col{display:flex;flex-direction:column;gap:3px;}
+.mini-entry{
+  width:54px;text-align:center;font-family:'Share Tech Mono',monospace;
+  font-size:10px;color:var(--text);padding:3px 2px;
+}
+.mini-entry.piv{color:var(--amber);font-weight:700;}
+.mini-entry.mod{color:var(--ph);}
+.mini-sep{width:1px;background:rgba(0,255,65,0.3);margin:0 5px;align-self:stretch;}
+
+.sol-summary-modal{
+  background:rgba(255,176,0,0.04);border:1px solid rgba(255,176,0,0.15);
+  border-radius:3px;padding:14px 18px;
+  font-size:12px;color:var(--text2);line-height:1.8;
+  font-family:'Exo 2',sans-serif;
+}
+.sol-summary-modal strong{color:var(--amber);text-shadow:0 0 6px rgba(255,176,0,0.3);}
+
+/* ── ANIM ── */
+.fade-up{opacity:0;transform:translateY(12px);animation:fadeUp .4s ease forwards;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+.fade-up:nth-child(1){animation-delay:.04s}.fade-up:nth-child(2){animation-delay:.1s}
+.fade-up:nth-child(3){animation-delay:.16s}.fade-up:nth-child(4){animation-delay:.22s}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ── TOUCH ── */
+@media(hover:none){
+  .card:hover{border-color:var(--border2);box-shadow:none;}
+  .op-card:hover{border-left-color:var(--ph-dim);box-shadow:none;}
+  .btn-primary:hover{transform:none;}
+  .btn-steps:hover{transform:none;}
+  .stat-box:hover{box-shadow:none;border-color:var(--border2);}
+}
+
+/* ── MOBILE ≤480px ── */
+@media(max-width:480px){
+  .page{padding:18px 14px 70px;}
+  header{margin-bottom:28px;padding-top:4px;}
+  .badge-row{gap:6px;margin-bottom:12px;}
+  .badge{font-size:7px;letter-spacing:2px;padding:4px 9px;}
+  h1{font-size:1.5rem;line-height:1.15;margin-bottom:8px;letter-spacing:0.04em;}
+  h1 em{font-size:0.65em;letter-spacing:0.08em;}
+  .subtitle{font-size:10px;line-height:1.7;}
+  .term-prompt{font-size:11px;}
+  .card{padding:14px 12px;border-radius:3px;}
+  .ops-row{grid-template-columns:1fr;gap:8px;}
+  .op-card{padding:12px 11px;}
+  input[type=text],input[type=number],select{font-size:16px;padding:11px 11px;margin-bottom:12px;}
+  .matrix-cell{width:48px;font-size:11px;padding:7px 3px;}
+  .chips{gap:5px;}.chip{font-size:8px;padding:5px 10px;}
+  .btn-primary{padding:14px;font-size:9px;min-height:48px;letter-spacing:2px;}
+  .btn-steps{padding:12px;font-size:8px;min-height:46px;letter-spacing:1.5px;}
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px;}
+  .stat-val{font-size:1.25rem;}.stat-name{font-size:7px;}
+  .matrices-row{grid-template-columns:1fr;}
+  .matrix-entry{width:56px;font-size:11px;}
+  .step-item{padding:11px 13px;}
+  .step-desc{font-size:11px;}
+  .modal-overlay{padding:0;align-items:flex-end;}
+  .modal{border-radius:4px 4px 0 0;max-height:94vh;}
+  .modal::after{content:'';display:block;width:36px;height:3px;background:var(--border2);border-radius:2px;margin:10px auto 0;}
+  .modal-header{padding:10px 16px 12px;}
+  .modal-title{font-size:0.95rem;letter-spacing:1px;}
+  .modal-body{padding:12px 14px 28px;max-height:calc(94vh - 68px);}
+  .mstep-body{padding-left:32px;font-size:11px;}
+  .mstep-matrix{padding-left:32px;}
+  .mini-entry{width:44px;font-size:9px;}
+  .sol-summary-modal{font-size:11px;padding:12px 13px;}
+  .answer-box-modal{padding:14px 12px;}
+  .abm-var-val{font-size:1.1rem;}
+}
+@media(min-width:481px) and (max-width:768px){
+  .page{padding:24px 18px 70px;}
+  input[type=text],input[type=number],select{font-size:16px;}
+  .ops-row{grid-template-columns:1fr 1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .matrices-row{grid-template-columns:1fr;}
+  .modal-overlay{padding:14px 12px 0;}
+  .modal{border-radius:4px 4px 0 0;max-height:92vh;}
+  .modal-body{padding:16px 20px 28px;max-height:calc(92vh - 72px);}
+}
+</style>
+</head>
+<body>
+
+<!-- CONSTELLATION CANVAS -->
+<canvas id="constellation"></canvas>
+
+<div class="page">
+
+<!-- HEADER -->
+<header>
+  <div class="badge-row">
+    <span class="badge">✦ Linear Algebra</span>
+    <span class="badge purple">◈ Gaussian Elimination</span>
+    <span class="badge teal">∿ Exponential Systems</span>
+  </div>
+  <h1>Elementary Row Operations<br><em style="font-family:'Orbitron',sans-serif;font-weight:400;font-size:0.6em;opacity:0.85">for Exponential &amp; Mixed Systems</em></h1>
+  <p class="subtitle">Solve systems of equations step-by-step using elementary row operations — supports exponential coefficients, decimal values, and mixed equations.</p>
+  <div class="star-divider"><span class="star-glyph">✦</span></div>
+</header>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <div class="card">
+    <div class="sec-lbl">Three Elementary Row Operations</div>
+    <div class="ops-row">
+      <div class="op-card">
+        <div class="op-num">I</div>
+        <div class="op-icon">↕</div>
+        <div class="op-title">Row Swap</div>
+        <div class="op-body">Exchange two rows of the augmented matrix. Changes row order without affecting the solution set.
+          <div class="op-formula">Rᵢ ↔ Rⱼ</div>
+        </div>
+      </div>
+      <div class="op-card">
+        <div class="op-num">II</div>
+        <div class="op-icon">×</div>
+        <div class="op-title">Row Scaling</div>
+        <div class="op-body">Multiply every element of a row by a non-zero scalar constant. Preserves all solutions.
+          <div class="op-formula">Rᵢ → k·Rᵢ &nbsp;(k ≠ 0)</div>
+        </div>
+      </div>
+      <div class="op-card">
+        <div class="op-num">III</div>
+        <div class="op-icon">⊕</div>
+        <div class="op-title">Row Replacement</div>
+        <div class="op-body">Replace a row with the sum of itself and a scalar multiple of another row — core of elimination.
+          <div class="op-formula">Rᵢ → Rᵢ + k·Rⱼ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Syntax reference -->
+    <div class="sec-lbl" style="margin-top:4px;">Input Syntax — Exponential Coefficients Supported</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;display:flex;gap:10px;align-items:center;">
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);">2.718x</span><span style="font-size:11px;color:var(--muted);">Decimal coefficient</span>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;display:flex;gap:10px;align-items:center;">
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);">e^2 · x</span><span style="font-size:11px;color:var(--muted);">Exponential coefficient</span>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;display:flex;gap:10px;align-items:center;">
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);">3/4</span><span style="font-size:11px;color:var(--muted);">Fraction input OK</span>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;display:flex;gap:10px;align-items:center;">
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);">sqrt(2)</span><span style="font-size:11px;color:var(--muted);">Irrational constants</span>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;display:flex;gap:10px;align-items:center;">
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);">2x + 3y = 7</span><span style="font-size:11px;color:var(--muted);">Equation form</span>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;display:flex;gap:10px;align-items:center;">
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);">pi, e, phi</span><span style="font-size:11px;color:var(--muted);">Math constants</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INPUT + PREVIEW -->
+<div class="top-section">
+  <div class="card">
+    <div class="card-title">Configure System</div>
+
+    <!-- Mode tabs -->
+    <div class="input-tabs">
+      <button class="itab active" onclick="switchInputTab('matrix',this)">Matrix Input</button>
+      <button class="itab" onclick="switchInputTab('equation',this)">Equation Input</button>
+    </div>
+
+    <!-- MATRIX INPUT -->
+    <div class="input-panel active" id="panel-matrix">
+      <div class="sec-lbl" style="margin-bottom:12px;">Presets</div>
+      <div class="chips" id="presetChips">
+        <span class="chip active" data-preset="0">2×2 Basic</span>
+        <span class="chip" data-preset="1">3×3 System</span>
+        <span class="chip" data-preset="2">Exponential</span>
+        <span class="chip" data-preset="3">Fraction coeffs</span>
+        <span class="chip" data-preset="4">4×4 System</span>
+      </div>
+
+      <div class="matrix-controls">
+        <label style="margin:0;">Size:</label>
+        <button class="size-btn" onclick="changeSize(-1,'row')">−</button>
+        <span class="size-display" id="sizeDisplay">3 × 3</span>
+        <button class="size-btn" onclick="changeSize(1,'row')">+</button>
+        <label style="margin:0 0 0 10px;"></label>
+      </div>
+
+      <div class="hint" style="margin-top:0;">Enter the augmented matrix [A|b]. Last column = right-hand side.</div>
+      <div class="matrix-wrap" id="matrixWrap"></div>
+    </div>
+
+    <!-- EQUATION INPUT -->
+    <div class="input-panel" id="panel-equation">
+      <div class="hint">Enter each equation in the form <strong>ax + by + cz = d</strong>. Use e, pi, sqrt(), decimal values, or fractions as coefficients.</div>
+      <div id="eqList"></div>
+      <button class="btn-add-eq" onclick="addEquation()">+ Add Equation</button>
+      <div style="height:14px;"></div>
+    </div>
+
+    <button class="btn-primary" onclick="solve()">▶ &nbsp;Solve &amp; Show Row Operations</button>
+    <button class="btn-steps" id="btnSteps" onclick="openModal()" style="display:none;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      Full Step-by-Step Solution
+    </button>
+  </div>
+
+  <!-- Right: augmented matrix preview -->
+  <div class="card" style="display:flex;flex-direction:column;gap:0;">
+    <div class="card-title">Augmented Matrix Preview</div>
+    <div id="matrixPreview" style="display:flex;align-items:center;justify-content:center;min-height:180px;padding:10px 0;">
+      <span style="color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;">Enter values to preview →</span>
+    </div>
+  </div>
+</div>
+
+<div class="error-box" id="errBox"></div>
+
+<!-- RESULTS -->
+<div id="results">
+
+  <!-- Answer -->
+  <div class="answer-banner fade-up">
+    <div class="answer-tag">Solution Found</div>
+    <div class="solution-vars" id="solutionVars"></div>
+    <div id="solutionNote" style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);margin-top:8px;"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box fade-up"><div class="stat-val" id="sSize">—</div><div class="stat-name">System Size</div></div>
+    <div class="stat-box fade-up"><div class="stat-val" id="sOps">—</div><div class="stat-name">Row Operations</div></div>
+    <div class="stat-box fade-up"><div class="stat-val" id="sRank">—</div><div class="stat-name">Matrix Rank</div></div>
+    <div class="stat-box fade-up"><div class="stat-val" id="sSol">—</div><div class="stat-name">Solution Type</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:22px;">
+    <div style="padding:18px 22px 0;">
+      <div class="tabs-bar">
+        <button class="tab active" onclick="switchTab('steps',this)">Row Operation Steps</button>
+        <button class="tab" onclick="switchTab('matrices',this)">Before &amp; After</button>
+      </div>
+    </div>
+
+    <div class="tab-pane active" id="tab-steps">
+      <div class="step-list" id="stepList"></div>
+    </div>
+
+    <div class="tab-pane" id="tab-matrices">
+      <div style="padding:20px 22px;">
+        <div class="matrices-row">
+          <div class="matrix-display-card">
+            <div class="matrix-display-title">Original Augmented Matrix [A|b]</div>
+            <div id="origMatrix"></div>
+          </div>
+          <div class="matrix-display-card">
+            <div class="matrix-display-title">Row Echelon Form (RREF)</div>
+            <div id="rrefMatrix"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /results -->
+</div><!-- /page -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOut(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✦ Step-by-Step Solution</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════
+   AURORA BOREALIS BACKGROUND
+   Layered sine-wave curtains of green/teal/cyan light
+   drifting slowly across a dark arctic sky, with a faint
+   star field behind for depth.
+═══════════════════════════════════════════════════════ */
+(function(){
+  const canvas=document.getElementById('constellation');
+  const ctx=canvas.getContext('2d');
+  let W,H,T=0;
+
+  // --- Stars (faint, few, cold-white) ---
+  let stars=[];
+  function initStars(){
+    stars=[];
+    for(let i=0;i<90;i++){
+      stars.push({
+        x:Math.random(),y:Math.random()*0.7,
+        r:Math.random()*0.9+0.2,
+        a:Math.random()*0.35+0.08,
+        da:(Math.random()-0.5)*0.003
+      });
+    }
+  }
+
+  function resize(){
+    W=canvas.width=window.innerWidth;
+    H=canvas.height=window.innerHeight;
+  }
+
+  // --- Aurora band definition ---
+  // Each band: vertical base position, amplitude, frequency, speed, colour stops, opacity
+  const BANDS=[
+    {yBase:0.28, amp:0.10, freq:1.2, spd:0.00018, stops:['rgba(0,255,80,0)',  'rgba(0,255,80,0.13)', 'rgba(0,220,60,0.22)', 'rgba(0,255,80,0.13)', 'rgba(0,255,80,0)'],  thick:0.18},
+    {yBase:0.38, amp:0.08, freq:0.9, spd:0.00024, stops:['rgba(0,255,180,0)', 'rgba(0,255,180,0.10)','rgba(0,230,160,0.18)','rgba(0,255,180,0.10)','rgba(0,255,180,0)'], thick:0.14},
+    {yBase:0.22, amp:0.07, freq:1.6, spd:0.00014, stops:['rgba(57,255,20,0)', 'rgba(57,255,20,0.08)', 'rgba(57,255,20,0.14)', 'rgba(57,255,20,0.08)', 'rgba(57,255,20,0)'],  thick:0.12},
+    {yBase:0.46, amp:0.06, freq:0.7, spd:0.00030, stops:['rgba(0,200,255,0)', 'rgba(0,200,255,0.07)','rgba(0,180,255,0.12)','rgba(0,200,255,0.07)','rgba(0,200,255,0)'],  thick:0.10},
+    {yBase:0.18, amp:0.05, freq:2.0, spd:0.00010, stops:['rgba(120,255,160,0)','rgba(120,255,160,0.06)','rgba(100,255,140,0.10)','rgba(120,255,160,0.06)','rgba(120,255,160,0)'],thick:0.09},
+  ];
+
+  // Per-band phase offset so they all start differently
+  BANDS.forEach((b,i)=>{ b.phase = i * 1.3; });
+
+  function drawAuroraBand(band){
+    const pts=80;
+    const time=T;
+    const yC=band.yBase*H;
+    const halfH=band.thick*H*0.5;
+
+    // Build the spine: a slowly undulating sine curve across the top portion
+    const spine=[];
+    for(let i=0;i<=pts;i++){
+      const px=(i/pts)*W;
+      const wave=
+        Math.sin(i/pts*Math.PI*2*band.freq + time*band.spd*1000 + band.phase)*band.amp*H
+        + Math.sin(i/pts*Math.PI*3.3*band.freq + time*band.spd*700 + band.phase*1.7)*band.amp*H*0.4
+        + Math.sin(i/pts*Math.PI*5.1*band.freq + time*band.spd*400 + band.phase*0.9)*band.amp*H*0.15;
+      spine.push({x:px, y:yC+wave});
+    }
+
+    // Draw the band as a thick curtain using vertical gradients at each segment
+    // Strategy: draw filled shape (top-edge to bottom-edge) column by column
+    // For performance, draw as a single filled path with top-curve then bottom-curve
+    const topEdge=spine.map(p=>({x:p.x, y:p.y - halfH}));
+    const botEdge=spine.map(p=>({x:p.x, y:p.y + halfH}));
+
+    // Use multiple overlapping vertical linear gradients in strips for the glow
+    const stripW=Math.ceil(W/40);
+    for(let s=0;s<40;s++){
+      const sx=s*stripW;
+      const idx=Math.min(Math.round(s/40*pts), pts);
+      const cy=spine[idx].y;
+      const grd=ctx.createLinearGradient(sx,cy-halfH*1.8,sx,cy+halfH*1.8);
+      band.stops.forEach((c,i)=>grd.addColorStop(i/(band.stops.length-1),c));
+      ctx.fillStyle=grd;
+      ctx.fillRect(sx,cy-halfH*1.8,stripW+1,halfH*3.6);
+    }
+
+    // Draw luminous spine line
+    ctx.save();
+    ctx.beginPath();
+    spine.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+    ctx.strokeStyle='rgba(0,255,80,0.06)';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // Arctic night sky — very dark, slight green-black tint
+    const sky=ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,'#010804');
+    sky.addColorStop(0.5,'#020a05');
+    sky.addColorStop(1,'#030f06');
+    ctx.fillStyle=sky;
+    ctx.fillRect(0,0,W,H);
+
+    // Faint stars
+    stars.forEach(s=>{
+      s.a+=s.da;
+      if(s.a>0.42||s.a<0.06)s.da*=-1;
+      ctx.beginPath();
+      ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,255,220,${s.a})`;
+      ctx.fill();
+    });
+
+    // Horizon glow — faint green shimmer at the base of the aurora
+    const hgrd=ctx.createLinearGradient(0,H*0.55,0,H*0.72);
+    hgrd.addColorStop(0,'rgba(0,255,80,0.04)');
+    hgrd.addColorStop(1,'transparent');
+    ctx.fillStyle=hgrd;
+    ctx.fillRect(0,H*0.55,W,H*0.2);
+
+    // Draw aurora bands back to front (darkest/widest first)
+    // Sort by opacity so dimmer ones go first
+    BANDS.forEach(b=>drawAuroraBand(b));
+
+    // Subtle top atmospheric haze
+    const haze=ctx.createLinearGradient(0,0,0,H*0.15);
+    haze.addColorStop(0,'rgba(0,40,10,0.18)');
+    haze.addColorStop(1,'transparent');
+    ctx.fillStyle=haze;
+    ctx.fillRect(0,0,W,H*0.15);
+  }
+
+  // ── PERFORMANCE DETECTION ──────────────────────────
+  // On mobile/low-end devices: fewer bands, capped FPS, fewer strips
+  const IS_MOBILE = window.innerWidth <= 768 ||
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const IS_LOW_END = IS_MOBILE && (
+    navigator.hardwareConcurrency <= 4 ||
+    typeof navigator.deviceMemory !== 'undefined' && navigator.deviceMemory <= 2
+  );
+
+  // Mobile: use only 3 bands (drop the faintest 2), fewer gradient strips
+  const ACTIVE_BANDS = IS_MOBILE ? BANDS.slice(0,3) : BANDS;
+  const STRIP_COUNT  = IS_LOW_END ? 20 : IS_MOBILE ? 28 : 40;
+
+  // Patch drawAuroraBand to use dynamic strip count
+  function drawAuroraBandAdaptive(band){
+    const pts = IS_MOBILE ? 50 : 80;
+    const time = T;
+    const yC   = band.yBase * H;
+    const halfH = band.thick * H * 0.5;
+
+    const spine = [];
+    for(let i=0;i<=pts;i++){
+      const px=(i/pts)*W;
+      const wave=
+        Math.sin(i/pts*Math.PI*2*band.freq + time*band.spd*1000 + band.phase)*band.amp*H
+        + Math.sin(i/pts*Math.PI*3.3*band.freq + time*band.spd*700 + band.phase*1.7)*band.amp*H*0.4
+        + Math.sin(i/pts*Math.PI*5.1*band.freq + time*band.spd*400 + band.phase*0.9)*band.amp*H*0.15;
+      spine.push({x:px, y:yC+wave});
+    }
+
+    const stripW = Math.ceil(W / STRIP_COUNT);
+    for(let s=0;s<STRIP_COUNT;s++){
+      const sx  = s * stripW;
+      const idx = Math.min(Math.round(s/STRIP_COUNT*pts), pts);
+      const cy  = spine[idx].y;
+      const grd = ctx.createLinearGradient(sx, cy-halfH*1.8, sx, cy+halfH*1.8);
+      band.stops.forEach((col,i)=>grd.addColorStop(i/(band.stops.length-1),col));
+      ctx.fillStyle=grd;
+      ctx.fillRect(sx, cy-halfH*1.8, stripW+1, halfH*3.6);
+    }
+
+    if(!IS_LOW_END){
+      ctx.save();
+      ctx.beginPath();
+      spine.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+      ctx.strokeStyle='rgba(0,255,80,0.06)';
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // Adaptive draw — uses reduced band set and strip count
+  function drawAdaptive(){
+    ctx.clearRect(0,0,W,H);
+
+    const sky=ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,'#010804');
+    sky.addColorStop(0.5,'#020a05');
+    sky.addColorStop(1,'#030f06');
+    ctx.fillStyle=sky;
+    ctx.fillRect(0,0,W,H);
+
+    // Skip individual star twinkle on low-end to save calls
+    const starLimit = IS_LOW_END ? 40 : stars.length;
+    for(let i=0;i<starLimit;i++){
+      const s=stars[i];
+      s.a+=s.da;
+      if(s.a>0.42||s.a<0.06)s.da*=-1;
+      ctx.beginPath();
+      ctx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2);
+      ctx.fillStyle=`rgba(200,255,220,${s.a})`;
+      ctx.fill();
+    }
+
+    const hgrd=ctx.createLinearGradient(0,H*0.55,0,H*0.72);
+    hgrd.addColorStop(0,'rgba(0,255,80,0.04)');
+    hgrd.addColorStop(1,'transparent');
+    ctx.fillStyle=hgrd;
+    ctx.fillRect(0,H*0.55,W,H*0.2);
+
+    ACTIVE_BANDS.forEach(b=>drawAuroraBandAdaptive(b));
+
+    if(!IS_MOBILE){
+      const haze=ctx.createLinearGradient(0,0,0,H*0.15);
+      haze.addColorStop(0,'rgba(0,40,10,0.18)');
+      haze.addColorStop(1,'transparent');
+      ctx.fillStyle=haze;
+      ctx.fillRect(0,0,W,H*0.15);
+    }
+  }
+
+  // ── FPS CAP ─────────────────────────────────────────
+  // Desktop: uncapped (~60fps)
+  // Mobile:  capped at 30fps
+  // Low-end: capped at 20fps
+  const TARGET_FPS = IS_LOW_END ? 20 : IS_MOBILE ? 30 : 60;
+  const FRAME_MS   = 1000 / TARGET_FPS;
+  let lastFrame = 0;
+
+  function animate(ts){
+    const now = ts || 0;
+    if(now - lastFrame < FRAME_MS){
+      requestAnimationFrame(animate);
+      return;
+    }
+    lastFrame = now;
+    T = now;
+    drawAdaptive();
+    requestAnimationFrame(animate);
+  }
+
+  resize();
+  initStars();
+  requestAnimationFrame(animate);
+  window.addEventListener('resize',()=>{
+    resize();
+    // Re-evaluate mobile status on resize (e.g. orientation change)
+  });
+})();
+
+/* ═══════════════════════════════════════════════════════
+   NUMERIC EXPRESSION EVALUATOR
+   Handles: decimals, fractions (3/4), e, pi, phi, sqrt, exp
+═══════════════════════════════════════════════════════ */
+function evalNum(s){
+  s=s.trim();
+  if(!s)return 0;
+  // Try fraction
+  const fracM=s.match(/^(-?\d+)\s*\/\s*(-?\d+)$/);
+  if(fracM)return parseFloat(fracM[1])/parseFloat(fracM[2]);
+  // Try expression
+  try{
+    const safe=s
+      .replace(/\bpi\b/gi, String(Math.PI))
+      .replace(/\bphi\b/gi, String((1+Math.sqrt(5))/2))
+      .replace(/\btau\b/gi, String(2*Math.PI))
+      .replace(/\be\b/g, String(Math.E))
+      .replace(/sqrt\(([^)]+)\)/g,(_,x)=>String(Math.sqrt(parseFloat(x))))
+      .replace(/exp\(([^)]+)\)/g,(_,x)=>String(Math.exp(parseFloat(x))))
+      .replace(/\^/g,'**');
+    const v=Function('"use strict";return('+safe+')')();
+    if(typeof v==='number'&&isFinite(v))return v;
+  }catch(e){}
+  const n=parseFloat(s);
+  if(!isNaN(n))return n;
+  throw new Error(`Cannot parse: "${s}"`);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MATRIX STATE
+═══════════════════════════════════════════════════════ */
+let ROWS=3,COLS=3; // COLS = variables (COLS+1 = augmented width)
+
+const PRESETS=[
+  // 2x2 basic
+  {r:2,c:2,vals:[[2,1,5],[1,3,10]]},
+  // 3x3
+  {r:3,c:3,vals:[[2,1,-1,8],[3,2,1,11],[1,0,2,5]]},
+  // exponential coefficients (e≈2.718, e²≈7.389)
+  {r:3,c:3,vals:[[2.718,1,0,8.718],[0,2.718,1,3.718],[1,0,7.389,8.389]]},
+  // fractions
+  {r:3,c:3,vals:[[0.5,0.25,1,2],[0.333,1,0.5,1.833],[1,0.5,0.25,1.75]]},
+  // 4x4
+  {r:4,c:4,vals:[[2,1,0,1,4],[1,3,1,0,6],[0,1,2,1,5],[1,0,1,3,7]]},
+];
+
+/* ═══════════════════════════════════════════════════════
+   BUILD MATRIX GRID
+═══════════════════════════════════════════════════════ */
+function buildMatrixGrid(){
+  const wrap=document.getElementById('matrixWrap');
+  // Use flex-column (rows) with flex-row (cols) — much more reliable than CSS grid for dynamic matrices
+  // Structure: outer = column-of-rows, each row = flex with cells + separator + rhs
+  let html=`<div style="display:inline-flex;flex-direction:column;gap:7px;">`;
+  for(let r=0;r<ROWS;r++){
+    html+=`<div style="display:flex;align-items:center;gap:7px;">`;
+    // Coefficient cells
+    for(let v=0;v<COLS;v++){
+      const old=getCell(r,v);
+      html+=`<input class="matrix-cell" id="mc_${r}_${v}" type="text" value="${old!==undefined?old:''}" placeholder="0" oninput="previewMatrix()">`;
+    }
+    // Augmented separator
+    html+=`<div class="aug-line"></div>`;
+    // RHS cell
+    const oldRHS=getCell(r,COLS);
+    html+=`<input class="matrix-cell rhs" id="mc_${r}_${COLS}" type="text" value="${oldRHS!==undefined?oldRHS:''}" placeholder="b" oninput="previewMatrix()">`;
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  wrap.innerHTML=html;
+  document.getElementById('sizeDisplay').textContent=`${ROWS} × ${COLS}`;
+  previewMatrix();
+}
+
+// Cache for cell values when resizing
+let _cellCache={};
+function getCell(r,c){
+  const el=document.getElementById(`mc_${r}_${c}`);
+  return el?el.value:(_cellCache[`${r}_${c}`]||'');
+}
+function saveCellCache(){
+  _cellCache={};
+  for(let r=0;r<ROWS;r++) for(let c=0;c<=COLS;c++){
+    const el=document.getElementById(`mc_${r}_${c}`);
+    if(el)_cellCache[`${r}_${c}`]=el.value;
+  }
+}
+
+function changeSize(delta,_){
+  saveCellCache();
+  const newR=Math.max(2,Math.min(6,ROWS+delta));
+  const newC=Math.max(2,Math.min(6,COLS+delta));
+  ROWS=newR;COLS=newC;
+  buildMatrixGrid();
+}
+
+function loadPreset(idx){
+  const p=PRESETS[idx];
+  ROWS=p.r;COLS=p.c;
+  _cellCache={};
+  p.vals.forEach((row,r)=>row.forEach((v,c)=>{_cellCache[`${r}_${c}`]=String(v);}));
+  buildMatrixGrid();
+}
+
+/* ═══════════════════════════════════════════════════════
+   MATRIX PREVIEW
+═══════════════════════════════════════════════════════ */
+function previewMatrix(){
+  const div=document.getElementById('matrixPreview');
+  try{
+    const mat=readMatrix();
+    div.innerHTML=renderAugMatrix(mat,null,null,'preview');
+  }catch(e){
+    div.innerHTML=`<span style="color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;">${e.message||'Enter valid numbers'}</span>`;
+  }
+}
+
+function readMatrix(){
+  const mat=[];
+  for(let r=0;r<ROWS;r++){
+    const row=[];
+    for(let c=0;c<=COLS;c++){
+      const el=document.getElementById(`mc_${r}_${c}`);
+      if(!el)throw new Error(`Missing cell ${r},${c}`);
+      row.push(evalNum(el.value||'0'));
+    }
+    mat.push(row);
+  }
+  return mat;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER AUGMENTED MATRIX (HTML)
+═══════════════════════════════════════════════════════ */
+function fmtN(n){
+  if(Math.abs(n)<1e-9)return'0';
+  if(Math.abs(n-Math.round(n))<1e-9)return String(Math.round(n));
+  return n.toFixed(4).replace(/\.?0+$/,'');
+}
+
+function renderAugMatrix(mat,pivotCol,modRows,size='normal'){
+  const nRows=mat.length,nCols=mat[0].length;
+  const varCols=nCols-1;
+  const w=size==='preview'?64:size==='mini'?50:68;
+  const fs=size==='preview'?12:size==='mini'?10:13;
+  const gap=size==='mini'?3:5;
+  const br=size==='mini'?'1.6em':'2.2em';
+
+  let html=`<div style="display:inline-flex;align-items:center;gap:0;overflow-x:auto;">`;
+  html+=`<span style="font-size:${br};color:rgba(0,255,65,0.3);font-family:'Share Tech Mono',monospace;padding:0 4px;line-height:1;">[</span>`;
+  html+=`<div style="display:flex;gap:0;">`;
+
+  for(let c=0;c<nCols;c++){
+    // Augment separator
+    if(c===varCols){
+      html+=`<div style="width:2px;background:linear-gradient(180deg,transparent,rgba(0,212,255,0.4),transparent);margin:0 6px;align-self:stretch;border-radius:1px;"></div>`;
+    }
+    html+=`<div style="display:flex;flex-direction:column;gap:${gap}px;">`;
+    for(let r=0;r<nRows;r++){
+      const isPiv=pivotCol===c&&r===c;
+      const isMod=modRows&&modRows.includes(r)&&c!==pivotCol;
+      let cls='';
+      if(isPiv)cls='font-weight:700;color:var(--gold);';
+      else if(isMod)cls='color:var(--accent);';
+      else if(Math.abs(mat[r][c])<1e-9)cls='color:var(--muted);';
+      html+=`<div style="width:${w}px;text-align:center;font-family:'Space Mono',monospace;font-size:${fs}px;${cls}padding:4px 2px;">${fmtN(mat[r][c])}</div>`;
+    }
+    html+=`</div>`;
+  }
+
+  html+=`</div>`;
+  html+=`<span style="font-size:${br};color:rgba(0,255,65,0.3);font-family:'Share Tech Mono',monospace;padding:0 4px;line-height:1;">]</span>`;
+  html+=`</div>`;
+  return html;
+}
+
+/* ═══════════════════════════════════════════════════════
+   EQUATION INPUT MODE
+═══════════════════════════════════════════════════════ */
+let eqCount=0;
+function addEquation(val=''){
+  eqCount++;
+  const id=`eq_${eqCount}`;
+  const div=document.createElement('div');
+  div.className='eq-row';div.id=id;
+  div.innerHTML=`
+    <input class="eq-input" type="text" placeholder="e.g. 2x + 3y = 7  or  2.718x - y + z = 5" value="${val}" oninput="parseEquations()">
+    <button class="eq-del" onclick="removeEq('${id}')">×</button>`;
+  document.getElementById('eqList').appendChild(div);
+}
+function removeEq(id){document.getElementById(id)?.remove();parseEquations();}
+
+function parseEquations(){
+  // Try to build matrix from equations and show preview
+  try{
+    const mat=equationsToMatrix();
+    ROWS=mat.length;COLS=mat[0].length-1;
+    const div=document.getElementById('matrixPreview');
+    div.innerHTML=renderAugMatrix(mat,null,null,'preview');
+  }catch(e){}
+}
+
+function equationsToMatrix(){
+  const inputs=[...document.querySelectorAll('.eq-input')].map(i=>i.value.trim()).filter(Boolean);
+  if(!inputs.length)throw new Error('No equations entered');
+
+  // Detect variables
+  const varSet=new Set();
+  inputs.forEach(eq=>{
+    const m=eq.matchAll(/([a-zA-Z])\s*(?=[+\-=]|$)/g);
+    for(const v of m) varSet.add(v[1]);
+  });
+  // Also detect patterns like "2x" "3y"
+  inputs.forEach(eq=>{
+    const m=eq.matchAll(/[+\-]?\s*[\d.]*\s*([a-zA-Z])/g);
+    for(const v of m) varSet.add(v[1]);
+  });
+  const vars=[...varSet].sort();
+  if(!vars.length)throw new Error('No variables found in equations');
+
+  const matrix=inputs.map(eq=>{
+    const row=new Array(vars.length+1).fill(0);
+    // Split at =
+    const parts=eq.split('=');
+    if(parts.length!==2)throw new Error(`Invalid equation: ${eq}`);
+    const lhs=parts[0].trim(),rhs=parts[1].trim();
+    row[vars.length]=evalNum(rhs);
+    // Parse LHS terms
+    const terms=lhs.match(/[+\-]?\s*(?:[\d.]+\s*\*?\s*[a-zA-Z]|[a-zA-Z](?:\s*[+\-]|$))/g)||[];
+    terms.forEach(term=>{
+      const t=term.trim();
+      // match coefficient and variable
+      const m=t.match(/^([+\-]?\s*[\d.]*)([a-zA-Z])$/);
+      if(!m)return;
+      let coeff=m[1].trim().replace(/\s+/g,'');
+      const varr=m[2];
+      if(coeff===''||coeff==='+')coeff='1';
+      else if(coeff==='-')coeff='-1';
+      const vi=vars.indexOf(varr);
+      if(vi>=0)row[vi]=evalNum(coeff);
+    });
+    return row;
+  });
+  return matrix;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GAUSSIAN ELIMINATION WITH FULL PIVOT TRACKING
+═══════════════════════════════════════════════════════ */
+function gaussElim(matIn){
+  const n=matIn.length;
+  const m=matIn[0].length; // n variables + 1 RHS
+  // Deep copy
+  let mat=matIn.map(r=>[...r]);
+  const steps=[];
+  const origMat=matIn.map(r=>[...r]);
+  let pivotRow=0;
+
+  for(let col=0;col<m-1&&pivotRow<n;col++){
+    // Find best pivot (partial pivoting)
+    let maxVal=Math.abs(mat[pivotRow][col]),maxRow=pivotRow;
+    for(let r=pivotRow+1;r<n;r++){
+      if(Math.abs(mat[r][col])>maxVal){maxVal=Math.abs(mat[r][col]);maxRow=r;}
+    }
+    if(maxVal<1e-9){continue;} // column is all zeros, skip
+
+    // Swap if needed
+    if(maxRow!==pivotRow){
+      [mat[pivotRow],mat[maxRow]]=[mat[maxRow],mat[pivotRow]];
+      steps.push({type:'swap',r1:pivotRow,r2:maxRow,
+        desc:`R${pivotRow+1} ↔ R${maxRow+1}`,
+        note:`Swap rows ${pivotRow+1} and ${maxRow+1} to bring the largest pivot to position (${pivotRow+1},${col+1}).`,
+        matrix:mat.map(r=>[...r]),pivotCol:col,modRows:[]});
+    }
+
+    // Scale pivot row to make pivot = 1
+    const pivot=mat[pivotRow][col];
+    if(Math.abs(pivot-1)>1e-9){
+      const k=1/pivot;
+      mat[pivotRow]=mat[pivotRow].map(v=>v*k);
+      steps.push({type:'scale',row:pivotRow,k,
+        desc:`R${pivotRow+1} → (1/${fmtN(pivot)}) · R${pivotRow+1}`,
+        note:`Scale row ${pivotRow+1} by 1/${fmtN(pivot)} to make the pivot element equal to 1.`,
+        matrix:mat.map(r=>[...r]),pivotCol:col,modRows:[pivotRow]});
+    }
+
+    // Eliminate all other rows
+    for(let r=0;r<n;r++){
+      if(r===pivotRow||Math.abs(mat[r][col])<1e-9)continue;
+      const factor=-mat[r][col];
+      mat[r]=mat[r].map((v,c)=>v+factor*mat[pivotRow][c]);
+      // Clean near-zeros
+      mat[r]=mat[r].map(v=>Math.abs(v)<1e-9?0:v);
+      steps.push({type:'replace',target:r,src:pivotRow,factor,
+        desc:`R${r+1} → R${r+1} + (${fmtN(factor)}) · R${pivotRow+1}`,
+        note:`Eliminate the entry in row ${r+1}, column ${col+1} by adding ${fmtN(factor)} times row ${pivotRow+1} to row ${r+1}.`,
+        matrix:mat.map(r=>[...r]),pivotCol:col,modRows:[r]});
+    }
+    pivotRow++;
+  }
+
+  // Determine solution
+  const nVars=m-1;
+  const solution={};
+  let solutionType='unique';
+  let rank=0;
+
+  // Count pivot columns
+  const pivots=[];
+  for(let r=0;r<n;r++){
+    for(let c=0;c<nVars;c++){
+      if(Math.abs(mat[r][c])>1e-9){pivots.push(c);rank++;break;}
+    }
+  }
+
+  // Check inconsistency: row of [0,0,...,0 | nonzero]
+  for(let r=0;r<n;r++){
+    const allZero=mat[r].slice(0,nVars).every(v=>Math.abs(v)<1e-9);
+    if(allZero&&Math.abs(mat[r][nVars])>1e-9){solutionType='inconsistent';break;}
+  }
+
+  if(solutionType==='unique'&&rank<nVars) solutionType='infinite';
+
+  if(solutionType==='unique'){
+    // Back-substitute from RREF
+    for(let r=0;r<Math.min(n,nVars);r++){
+      const varNames='xyzwuvst';
+      solution[varNames[r]||`x${r+1}`]=mat[r][nVars];
+    }
+  }
+
+  return{steps,rref:mat,origMat,solution,solutionType,rank,nVars,n};
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let STATE={result:null,inputMode:'matrix'};
+
+/* ═══════════════════════════════════════════════════════
+   SOLVE
+═══════════════════════════════════════════════════════ */
+function solve(){
+  hideErr();
+  let mat;
+  try{
+    if(STATE.inputMode==='matrix'){
+      mat=readMatrix();
+    } else {
+      mat=equationsToMatrix();
+    }
+  }catch(e){return showErr(e.message);}
+
+  if(mat.length<2)return showErr('System needs at least 2 equations.');
+  if(mat[0].length<3)return showErr('System needs at least 2 variables (2 columns + RHS).');
+
+  let result;
+  try{result=gaussElim(mat);}
+  catch(e){return showErr('Solver error: '+e.message);}
+
+  STATE.result=result;
+  applyResults(result);
+}
+
+function applyResults(res){
+  const{steps,rref,origMat,solution,solutionType,rank,nVars,n}=res;
+  const varNames='xyzwuvst';
+
+  // Answer banner
+  const varsDiv=document.getElementById('solutionVars');
+  varsDiv.innerHTML='';
+  document.getElementById('solutionNote').textContent='';
+
+  if(solutionType==='unique'){
+    Object.entries(solution).forEach(([k,v])=>{
+      varsDiv.innerHTML+=`<div class="sol-var"><div class="sol-var-name">${k}</div><div class="sol-var-val">${fmtN(v)}</div></div>`;
+    });
+  } else if(solutionType==='inconsistent'){
+    varsDiv.innerHTML=`<div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--error);">No Solution</div>`;
+    document.getElementById('solutionNote').textContent='The system is inconsistent — equations contradict each other.';
+  } else {
+    varsDiv.innerHTML=`<div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--amber);">Infinite Solutions</div>`;
+    document.getElementById('solutionNote').textContent=`System has ${nVars-rank} free variable(s). Rank = ${rank}.`;
+  }
+
+  document.getElementById('sSize').textContent=`${n}×${nVars}`;
+  document.getElementById('sOps').textContent=steps.length;
+  document.getElementById('sRank').textContent=rank;
+  const st=document.getElementById('sSol');
+  st.textContent=solutionType==='unique'?'Unique':solutionType==='inconsistent'?'None':'∞';
+  st.style.color=solutionType==='unique'?'var(--success)':solutionType==='inconsistent'?'var(--error)':'var(--gold)';
+
+  // Step list
+  const stepList=document.getElementById('stepList');
+  stepList.innerHTML='';
+  if(!steps.length){
+    stepList.innerHTML=`<div style="padding:24px 22px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;">No row operations needed — matrix was already in RREF.</div>`;
+  } else {
+    steps.forEach((s,i)=>{
+      const div=document.createElement('div');
+      div.className='step-item';
+      div.innerHTML=`
+        <div class="step-badge">${i+1}</div>
+        <div class="step-content">
+          <div class="step-op">${s.desc}</div>
+          <div class="step-desc">${s.note}</div>
+          <div class="step-matrix-preview">${renderAugMatrix(s.matrix,s.pivotCol,s.modRows,'mini')}</div>
+        </div>`;
+      stepList.appendChild(div);
+    });
+  }
+
+  // Before / After matrices
+  document.getElementById('origMatrix').innerHTML=renderAugMatrix(origMat,null,null,'normal');
+  document.getElementById('rrefMatrix').innerHTML=renderAugMatrix(rref,null,null,'normal');
+
+  document.getElementById('results').style.display='block';
+  document.getElementById('btnSteps').style.display='flex';
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════ */
+function openModal(){buildModal();document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+function closeModalOut(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+
+function buildModal(){
+  const{steps,origMat,rref,solution,solutionType,rank,nVars,n}=STATE.result;
+  const varNames='xyzwuvst';
+
+  let h=`
+  <div class="answer-box-modal">
+    <div class="answer-box-modal-label">✦ Solution</div>
+    <div class="answer-box-modal-vars">`;
+
+  if(solutionType==='unique'){
+    Object.entries(solution).forEach(([k,v])=>{
+      h+=`<div class="abm-var"><div class="abm-var-name">${k}</div><div class="abm-var-val">${fmtN(v)}</div></div>`;
+    });
+  } else {
+    h+=`<div class="abm-var"><div class="abm-var-val" style="color:${solutionType==='inconsistent'?'var(--error)':'var(--gold);font-size:1.1rem'}">${solutionType==='inconsistent'?'Inconsistent — No Solution':'Infinitely Many Solutions'}</div></div>`;
+  }
+  h+=`</div></div>`;
+
+  // Setup
+  h+=`
+  <div class="msec">
+    <div class="msec-title">System Setup</div>
+    <div class="mstep">
+      <div class="mstep-header"><div class="mstep-num">★</div><div class="mstep-title">Original Augmented Matrix [A|b]</div></div>
+      <div class="mstep-body">
+        The system has <span class="hl">${n} equations</span> and <span class="hl">${nVars} unknowns</span> (${[...Array(nVars)].map((_,i)=>varNames[i]||`x${i+1}`).join(', ')}).
+        We form the augmented matrix and apply elementary row operations to reach Reduced Row Echelon Form (RREF).
+        <div style="margin-top:12px;overflow-x:auto;">${renderAugMatrix(origMat,null,null,'normal')}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Steps
+  h+=`<div class="msec"><div class="msec-title">Elementary Row Operations</div>`;
+  if(!steps.length){
+    h+=`<div class="mstep"><div class="mstep-body">The matrix was already in RREF. No operations needed.</div></div>`;
+  } else {
+    steps.forEach((s,i)=>{
+      const isLast=i===steps.length-1;
+      h+=`
+      <div class="mstep" ${isLast?'style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.03)"':''}>
+        <div class="mstep-header">
+          <div class="mstep-num" style="${isLast?'background:linear-gradient(135deg,#34d399,#059669)':''}">${i+1}</div>
+          <div class="mstep-title">Operation ${i+1}: <code>${s.desc}</code></div>
+        </div>
+        <div class="mstep-body">
+          ${s.note}<br><br>
+          ${s.type==='swap'?`Swap rows <span class="hl">R${s.r1+1}</span> and <span class="hl">R${s.r2+1}</span> — brings a larger pivot to the diagonal.`:''}
+          ${s.type==='scale'?`Multiply every entry of <span class="hl">R${s.row+1}</span> by <code>${fmtN(s.k)}</code> to normalize the pivot to 1.`:''}
+          ${s.type==='replace'?`Add <code>${fmtN(s.factor)}</code> × R${s.src+1} to R${s.target+1} to eliminate the entry in this column.`:''}
+          <div style="margin-top:10px;overflow-x:auto;">${renderAugMatrix(s.matrix,s.pivotCol,s.modRows,'normal')}</div>
+        </div>
+      </div>`;
+    });
+  }
+  h+=`</div>`;
+
+  // RREF + Solution
+  h+=`
+  <div class="msec">
+    <div class="msec-title">Final RREF &amp; Back-Substitution</div>
+    <div class="mstep">
+      <div class="mstep-header"><div class="mstep-num">✓</div><div class="mstep-title">Reduced Row Echelon Form</div></div>
+      <div class="mstep-body">
+        After ${steps.length} operation${steps.length!==1?'s':''}, the matrix is in RREF with rank = <span class="hl">${rank}</span>.
+        <div style="margin-top:10px;overflow-x:auto;">${renderAugMatrix(rref,null,null,'normal')}</div>
+      </div>
+    </div>`;
+
+  if(solutionType==='unique'){
+    h+=`<div class="mstep" style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.04);">
+      <div class="mstep-header"><div class="mstep-num" style="background:linear-gradient(135deg,#34d399,#059669)">→</div>
+        <div class="mstep-title">Reading the Solution</div></div>
+      <div class="mstep-body">
+        Each row now reads: <code>1·xᵢ = value</code>. Reading directly:<br><br>
+        ${Object.entries(solution).map(([k,v])=>`<code>${k} = ${fmtN(v)}</code>`).join('<br>')}
+        <br><br><span class="gr">✓ Unique solution found.</span>
+      </div>
+    </div>`;
+  }
+  h+=`</div>`;
+
+  // Summary
+  h+=`
+  <div class="msec">
+    <div class="msec-title">Conclusion</div>
+    <div class="sol-summary-modal">
+      The system of <strong>${n} equations in ${nVars} unknowns</strong> was solved using
+      <strong>${steps.length} elementary row operation${steps.length!==1?'s':''}</strong> (${steps.filter(s=>s.type==='swap').length} swaps,
+      ${steps.filter(s=>s.type==='scale').length} scalings, ${steps.filter(s=>s.type==='replace').length} replacements).
+      Matrix rank = <strong>${rank}</strong>.
+      ${solutionType==='unique'?`The unique solution is: ${Object.entries(solution).map(([k,v])=>`<strong>${k} = ${fmtN(v)}</strong>`).join(', ')}.`:''}
+      ${solutionType==='inconsistent'?'The system has <strong>no solution</strong> — it is inconsistent.':''}
+      ${solutionType==='infinite'?`The system has <strong>infinitely many solutions</strong> with ${nVars-rank} free variable(s).`:''}
+    </div>
+  </div>`;
+
+  document.getElementById('modalBody').innerHTML=h;
+}
+
+/* ═══════════════════════════════════════════════════════
+   UI HELPERS
+═══════════════════════════════════════════════════════ */
+function showErr(m){const e=document.getElementById('errBox');e.innerHTML=`<strong>⚠ Error:</strong> ${m}`;e.style.display='block';}
+function hideErr(){document.getElementById('errBox').style.display='none';}
+
+function switchInputTab(name,btn){
+  document.querySelectorAll('.itab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.input-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  STATE.inputMode=name;
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tabs-bar .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+// Preset chips
+document.querySelectorAll('#presetChips .chip').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll('#presetChips .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    loadPreset(parseInt(c.dataset.preset));
+  });
+});
+
+// Equation input — start with 3 equations
+function initEquations(){
+  addEquation('2x + y - z = 8');
+  addEquation('3x + 2y + z = 11');
+  addEquation('x + 2z = 5');
+}
+
+// Build initial matrix
+loadPreset(0);
+initEquations();
+
+// Enter key
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName!=='BUTTON')solve();});
+
+// Mobile: prevent iOS zoom
+window.addEventListener('load',()=>{
+  document.querySelectorAll('input').forEach(i=>{
+    if(!i.style.fontSize) i.style.fontSize='16px';
+  });
+});
+</script>
+</body>
+</html>
