@@ -11,73 +11,67 @@
    Bright, fun, candy-pink on white.
 ═══════════════════════════════════════════ */
 :root{
-  --bg:#fff0f8;
-  --surface:#ffe4f3;
-  --surface2:#ffd0eb;
-  --surface3:#ffbee3;
-  --border:#ffaad9;
-  --border2:#ff77c0;
-  --ph:#ff3dab;          /* bubblegum pink */
-  --ph2:#e6008f;         /* deeper pink */
-  --ph3:#ff69c9;         /* light candy */
-  --ph-dim:#ffb3df;      /* very light pink */
-  --ph-glow:rgba(255,61,171,0.12);
-  --amber:#c026a0;       /* magenta accent */
-  --red:#e53e3e;         /* error red */
-  --text:#4a0030;
-  --text2:#9d1b6e;
-  --muted:#e8a0cc;
-  --success:#0f9f6e;
-  --error:#e53e3e;
-  --gold:#c026a0;
+  --bg:#fdf0f6;
+  --surface:#fff5fb;
+  --surface2:#fce8f4;
+  --surface3:#f9dced;
+  --border:#f0b8d8;
+  --border2:#e07ab0;
+  --ph:#c2185b;          /* deep rose — readable on white */
+  --ph2:#880e4f;         /* dark magenta */
+  --ph3:#e91e8c;         /* vivid pink accent */
+  --ph-dim:#f48cb6;      /* soft pink */
+  --ph-glow:rgba(194,24,91,0.10);
+  --amber:#6a0f3a;       /* dark rose for secondary text */
+  --red:#c62828;
+  --text:#3b0024;        /* very dark rose — great contrast */
+  --text2:#6d1a45;       /* medium dark rose */
+  --muted:#b07090;
+  --success:#2e7d32;
+  --error:#c62828;
+  --gold:#880e4f;
   --accent:var(--ph);
   --accent2:var(--amber);
-  --accent3:#a855f7;
+  --accent3:#7b1fa2;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{
-  background:var(--bg);color:var(--text);
+  background-color:#fdf0f6;
+  color:var(--text);
   font-family:'Exo 2',sans-serif;
   min-height:100vh;overflow-x:hidden;
+  /* Soft pink graphing paper — subtle, easy on eyes */
+  background-image:
+    linear-gradient(rgba(194,24,91,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(194,24,91,0.13) 1px, transparent 1px),
+    linear-gradient(rgba(194,24,91,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(194,24,91,0.05) 1px, transparent 1px);
+  background-size: 60px 60px, 60px 60px, 12px 12px, 12px 12px;
 }
 
-/* scanline overlay */
-body::before{
-  content:'';position:fixed;inset:0;z-index:2;pointer-events:none;
-  background:repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(255,61,171,0.04) 2px,
-    rgba(255,61,171,0.04) 4px
-  );
-}
-
-/* ── CONSTELLATION ── */
-#constellation{position:fixed;inset:0;z-index:0;pointer-events:none;/* aurora canvas */}
 
 /* ── PAGE ── */
-.page{position:relative;z-index:3;max-width:1300px;margin:0 auto;padding:40px 28px 90px;}
+.page{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:40px 28px 90px;}
 
 /* ── HEADER ── */
 header{text-align:center;margin-bottom:52px;padding-top:16px;}
 .badge-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
 .badge{
   display:inline-flex;align-items:center;gap:6px;
-  background:rgba(0,255,65,0.06);border:1px solid rgba(0,255,65,0.25);
+  background:rgba(255,110,180,0.08);border:1px solid rgba(255,110,180,0.3);
   color:var(--ph2);font-family:'Share Tech Mono',monospace;
   font-size:9px;letter-spacing:3px;text-transform:uppercase;
   padding:5px 14px;border-radius:2px;
-  text-shadow:0 0 8px rgba(0,255,65,0.4);
+  text-shadow:none;
 }
 .badge.purple{
   background:rgba(255,176,0,0.06);border-color:rgba(255,176,0,0.25);
-  color:var(--amber);text-shadow:0 0 8px rgba(255,176,0,0.4);
+  color:var(--amber);text-shadow:none;
 }
 .badge.teal{
   background:rgba(0,229,255,0.06);border-color:rgba(0,229,255,0.25);
-  color:var(--accent3);text-shadow:0 0 8px rgba(0,229,255,0.4);
+  color:var(--accent3);text-shadow:none;
 }
 
 /* Blinking cursor before title */
@@ -98,18 +92,18 @@ h1{
   font-family:'Orbitron',sans-serif;font-weight:700;
   font-size:clamp(1.6rem,4.5vw,3.2rem);line-height:1.1;
   color:var(--ph);letter-spacing:0.06em;margin-bottom:10px;
-  text-shadow:0 0 20px rgba(255,61,171,0.4),0 0 40px rgba(255,61,171,0.15);
+  text-shadow:none;
 }
 h1 em{
   font-style:normal;font-weight:400;font-size:0.62em;
   color:var(--ph2);display:block;letter-spacing:0.1em;
-  text-shadow:0 0 12px rgba(255,61,171,0.2);
+  text-shadow:none;
 }
 .subtitle{
   font-family:'Share Tech Mono',monospace;
   color:var(--text2);font-size:12px;letter-spacing:1px;
   max-width:620px;margin:0 auto;line-height:1.8;
-  text-shadow:0 0 6px rgba(230,0,143,0.2);
+  text-shadow:none;
 }
 .term-line{
   width:100%;max-width:500px;height:1px;margin:22px auto 0;
@@ -155,7 +149,7 @@ h1 em{
   letter-spacing:4px;text-transform:uppercase;
   color:var(--ph);margin-bottom:20px;
   display:flex;align-items:center;gap:10px;
-  text-shadow:0 0 10px rgba(255,61,171,0.4);
+  text-shadow:none;
 }
 .card-title::before{content:'//';color:var(--ph-dim);font-family:'Share Tech Mono',monospace;font-size:10px;}
 .card-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
@@ -199,13 +193,13 @@ h1 em{
   font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;
   letter-spacing:2px;text-transform:uppercase;
   color:var(--ph);margin-bottom:7px;
-  text-shadow:0 0 8px rgba(255,61,171,0.35);
+  text-shadow:none;
 }
-.op-body{font-size:12px;color:var(--text2);line-height:1.65;font-family:'Exo 2',sans-serif;}
+.op-body{font-size:13px;color:var(--text2);line-height:1.65;font-family:'Exo 2',sans-serif;}
 .op-formula{
   display:inline-block;
-  background:rgba(0,255,65,0.05);
-  border:1px solid rgba(0,255,65,0.2);
+  background:rgba(255,110,180,0.06);
+  border:1px solid rgba(255,110,180,0.25);
   border-radius:2px;padding:3px 10px;
   font-family:'Share Tech Mono',monospace;
   font-size:10px;color:var(--amber);margin-top:7px;
@@ -234,7 +228,7 @@ input::placeholder{color:var(--muted);font-size:11px;}
 select{cursor:pointer;-webkit-appearance:none;appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300cc33' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;}
-.hint{font-size:11px;color:var(--muted);margin-top:-12px;margin-bottom:14px;font-style:normal;
+.hint{font-size:12px;color:var(--text2);margin-top:-12px;margin-bottom:14px;font-style:normal;
   line-height:1.6;font-family:'Share Tech Mono',monospace;letter-spacing:0.3px;}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
@@ -253,9 +247,9 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
   cursor:pointer;border-radius:2px;transition:all .2s;
 }
 .itab.active{
-  background:rgba(0,255,65,0.08);color:var(--ph);
-  border:1px solid rgba(0,255,65,0.2);
-  text-shadow:0 0 8px rgba(0,255,65,0.4);
+  background:rgba(255,110,180,0.1);color:var(--ph);
+  border:1px solid rgba(255,110,180,0.3);
+  text-shadow:none;
 }
 .input-panel{display:none;}.input-panel.active{display:block;}
 
@@ -277,14 +271,14 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
   font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--ph);
   background:rgba(255,61,171,0.08);border:1px solid rgba(255,61,171,0.3);
   border-radius:2px;padding:5px 12px;letter-spacing:2px;
-  text-shadow:0 0 6px rgba(255,61,171,0.3);
+  text-shadow:none;
 }
 .matrix-grid{display:inline-grid;gap:6px;margin-bottom:14px;}
 .matrix-cell{
-  width:56px;background:var(--surface2);
+  width:64px;background:var(--surface2);
   border:1px solid var(--border);border-radius:2px;
   color:var(--ph);font-family:'Share Tech Mono',monospace;
-  font-size:12px;padding:8px 4px;text-align:center;outline:none;
+  font-size:15px;padding:8px 4px;text-align:center;outline:none;
   transition:border-color .2s,box-shadow .2s;caret-color:var(--ph);
 }
 .matrix-cell:focus{
@@ -319,7 +313,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 .chip.active{
   border-color:var(--ph2);color:var(--ph);
   background:rgba(255,61,171,0.12);
-  text-shadow:0 0 6px rgba(255,61,171,0.4);
+  text-shadow:none;
   box-shadow:0 0 8px rgba(255,61,171,0.1);
 }
 
@@ -332,12 +326,12 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
   font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
   cursor:pointer;position:relative;overflow:hidden;
   transition:all .2s;
-  text-shadow:0 0 10px rgba(255,61,171,0.4);
-  box-shadow:0 0 15px rgba(0,255,65,0.1),inset 0 0 15px rgba(0,255,65,0.04);
+  text-shadow:none;
+  box-shadow:0 0 15px rgba(255,110,180,0.2),inset 0 0 15px rgba(255,110,180,0.06);
 }
 .btn-primary::before{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(0,255,65,0.08),transparent);
+  background:linear-gradient(135deg,rgba(255,110,180,0.1),transparent);
 }
 .btn-primary:hover{
   background:rgba(255,61,171,0.1);
@@ -354,7 +348,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
   color:var(--amber);font-family:'Orbitron',sans-serif;
   font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;
   cursor:pointer;transition:all .2s;margin-top:12px;
-  text-shadow:0 0 8px rgba(192,38,160,0.4);
+  text-shadow:none;
 }
 .btn-steps:hover{
   background:rgba(192,38,160,0.12);border-color:rgba(192,38,160,0.6);
@@ -370,7 +364,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
   padding:10px 12px;outline:none;transition:border-color .2s;
   caret-color:var(--ph);
 }
-.eq-input:focus{border-color:var(--ph2);box-shadow:0 0 8px rgba(0,255,65,0.08);}
+.eq-input:focus{border-color:var(--ph2);box-shadow:0 0 8px rgba(255,110,180,0.15);}
 .eq-input::placeholder{color:var(--muted);}
 .eq-sep{color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:13px;flex-shrink:0;}
 .eq-del{
@@ -393,7 +387,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 
 .answer-banner{
   background:var(--surface);
-  border:1px solid rgba(0,255,65,0.25);
+  border:1px solid rgba(255,110,180,0.3);
   border-radius:4px;padding:28px 32px;margin-bottom:18px;
   text-align:center;position:relative;overflow:hidden;
 }
@@ -410,7 +404,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
   font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
   text-transform:uppercase;color:var(--ph);margin-bottom:14px;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  text-shadow:0 0 10px rgba(255,61,171,0.4);
+  text-shadow:none;
 }
 .answer-tag::before{content:'[ ';color:var(--ph-dim);}
 .answer-tag::after{content:' ]';color:var(--ph-dim);}
@@ -418,7 +412,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 .solution-vars{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-bottom:10px;}
 .sol-var{
   background:var(--surface2);
-  border:1px solid rgba(0,255,65,0.2);
+  border:1px solid rgba(255,110,180,0.25);
   border-radius:3px;padding:12px 20px;text-align:center;min-width:100px;
   box-shadow:0 0 15px rgba(255,61,171,0.06);
 }
@@ -428,7 +422,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 }
 .sol-var-val{
   font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:700;
-  color:var(--ph);text-shadow:0 0 15px rgba(255,61,171,0.4);
+  color:var(--ph);text-shadow:none;
 }
 
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
@@ -446,7 +440,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 .stat-val{
   font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:700;
   color:var(--ph);margin-bottom:4px;
-  text-shadow:0 0 12px rgba(255,61,171,0.35);
+  text-shadow:none;
 }
 .stat-name{
   font-family:'Share Tech Mono',monospace;font-size:8px;
@@ -472,7 +466,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 
 .aug-matrix{display:inline-flex;align-items:center;gap:0;position:relative;}
 .aug-matrix .bracket-l,.aug-matrix .bracket-r{
-  font-size:2.5em;color:rgba(0,255,65,0.3);line-height:1;
+  font-size:2.5em;color:rgba(255,110,180,0.4);line-height:1;
   font-family:'Share Tech Mono',monospace;padding:0 4px;
 }
 .matrix-cols{display:flex;gap:0;}
@@ -484,9 +478,9 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 }
 .matrix-entry.pivot{color:var(--amber);font-weight:700;text-shadow:0 0 6px rgba(255,176,0,0.4);}
 .matrix-entry.zero{color:var(--muted);}
-.matrix-entry.modified{background:rgba(0,255,65,0.08);color:var(--ph);}
+.matrix-entry.modified{background:rgba(255,110,180,0.1);color:var(--ph);}
 .aug-sep-col{
-  width:1px;background:linear-gradient(180deg,transparent,rgba(0,255,65,0.4),transparent);
+  width:1px;background:linear-gradient(180deg,transparent,rgba(255,110,180,0.5),transparent);
   margin:0 8px;align-self:stretch;
 }
 
@@ -502,30 +496,30 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 .steps-title{
   font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;
   color:var(--ph);letter-spacing:3px;text-transform:uppercase;
-  text-shadow:0 0 8px rgba(0,255,65,0.4);
+  text-shadow:none;
 }
 .step-list{padding:4px 0;}
 .step-item{
   display:flex;align-items:flex-start;gap:14px;padding:14px 20px;
-  border-bottom:1px solid rgba(13,43,16,0.8);transition:background .15s;cursor:pointer;
+  border-bottom:1px solid rgba(107,0,56,0.5);transition:background .15s;cursor:pointer;
 }
 .step-item:last-child{border-bottom:none;}
 .step-item:hover{background:rgba(255,61,171,0.04);}
-.step-item.active-step{background:rgba(0,255,65,0.04);border-left:2px solid var(--ph2);}
+.step-item.active-step{background:rgba(255,110,180,0.06);border-left:2px solid var(--ph2);}
 .step-badge{
   flex-shrink:0;width:28px;height:28px;border-radius:2px;
   background:rgba(255,61,171,0.1);border:1px solid rgba(255,61,171,0.35);
   display:flex;align-items:center;justify-content:center;
   font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--ph);
-  text-shadow:0 0 6px rgba(255,61,171,0.4);
+  text-shadow:none;
 }
 .step-content{flex:1;}
 .step-op{
   font-family:'Share Tech Mono',monospace;font-size:11px;
   color:var(--amber);margin-bottom:4px;
-  text-shadow:0 0 6px rgba(192,38,160,0.3);
+  text-shadow:none;
 }
-.step-desc{font-size:13px;color:var(--text2);line-height:1.6;font-family:'Exo 2',sans-serif;}
+.step-desc{font-size:14px;color:var(--text2);line-height:1.6;font-family:'Exo 2',sans-serif;}
 .step-matrix-preview{margin-top:10px;overflow-x:auto;}
 
 /* ── TABS ── */
@@ -543,7 +537,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 .tab.active{
   background:rgba(255,61,171,0.09);color:var(--ph);
   border:1px solid rgba(255,61,171,0.3);
-  text-shadow:0 0 6px rgba(255,61,171,0.3);
+  text-shadow:none;
 }
 .tab-pane{display:none;}.tab-pane.active{display:block;}
 
@@ -557,7 +551,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 
 /* ── MODAL ── */
 .modal-overlay{
-  position:fixed;inset:0;z-index:1000;background:rgba(74,0,48,0.55);
+  position:fixed;inset:0;z-index:1000;background:rgba(10,0,8,0.75);
   display:none;align-items:flex-start;justify-content:center;
   padding:40px 20px;overflow-y:auto;
 }
@@ -620,7 +614,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 .answer-box-modal-label{
   font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;
   text-transform:uppercase;color:var(--ph);margin-bottom:12px;
-  text-shadow:0 0 8px rgba(255,61,171,0.4);
+  text-shadow:none;
 }
 .answer-box-modal-vars{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:8px;}
 .abm-var{
@@ -630,7 +624,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 .abm-var-name{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text2);letter-spacing:2px;}
 .abm-var-val{
   font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;
-  color:var(--ph);text-shadow:0 0 10px rgba(255,61,171,0.4);
+  color:var(--ph);text-shadow:none;
 }
 
 .mstep{
@@ -645,7 +639,7 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
   background:rgba(255,61,171,0.1);border:1px solid rgba(255,61,171,0.3);
   display:flex;align-items:center;justify-content:center;
   font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--ph);
-  text-shadow:0 0 6px rgba(255,61,171,0.4);
+  text-shadow:none;
 }
 .mstep-title{font-size:13px;font-weight:500;color:var(--text);padding-top:4px;font-family:'Exo 2',sans-serif;}
 .mstep-body{font-size:12px;color:var(--text2);line-height:1.8;padding-left:40px;font-family:'Exo 2',sans-serif;}
@@ -655,13 +649,13 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
   font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--amber);
   text-shadow:0 0 4px rgba(192,38,160,0.3);
 }
-.mstep-body .hl{color:var(--ph);font-weight:600;text-shadow:0 0 6px rgba(255,61,171,0.3);}
+.mstep-body .hl{color:var(--ph);font-weight:600;text-shadow:none;}
 .mstep-body .gr{color:var(--ph);font-weight:600;}
 .mstep-matrix{margin-top:10px;overflow-x:auto;padding-left:40px;}
 
 .mini-matrix{display:inline-flex;align-items:center;gap:0;}
 .mini-matrix .br{
-  font-size:1.6em;color:rgba(0,255,65,0.3);
+  font-size:1.6em;color:rgba(255,110,180,0.5);
   font-family:'Share Tech Mono',monospace;padding:0 3px;
 }
 .mini-cols{display:flex;gap:0;}
@@ -682,7 +676,27 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 }
 .sol-summary-modal strong{color:var(--amber);text-shadow:0 0 6px rgba(255,176,0,0.3);}
 
-/* ── ANIM ── */
+/* ── FRACTION DISPLAY ── */
+.frac-whole{
+  font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:700;
+  color:var(--ph);
+}
+.frac-html{
+  display:inline-flex;flex-direction:column;align-items:center;
+  font-family:'Orbitron',sans-serif;font-weight:700;color:var(--ph);
+  line-height:1;vertical-align:middle;gap:1px;
+  font-size:1rem;
+}
+.frac-html .frac-bar{
+  display:block;width:100%;min-width:24px;height:2px;
+  background:var(--ph);border-radius:1px;margin:2px 0;
+}
+.sol-var-val .frac-whole,
+.sol-var-val .frac-html{ font-size:1.4rem; }
+.abm-var-val .frac-whole,
+.abm-var-val .frac-html{ font-size:1.2rem; }
+
+
 .fade-up{opacity:0;transform:translateY(12px);animation:fadeUp .4s ease forwards;}
 @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
 .fade-up:nth-child(1){animation-delay:.04s}.fade-up:nth-child(2){animation-delay:.1s}
@@ -751,9 +765,6 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 </style>
 </head>
 <body>
-
-<!-- CONSTELLATION CANVAS -->
-<canvas id="constellation"></canvas>
 
 <div class="page">
 
@@ -950,255 +961,6 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;
 'use strict';
 
 /* ═══════════════════════════════════════════════════════
-   AURORA BOREALIS BACKGROUND
-   Layered sine-wave curtains of green/teal/cyan light
-   drifting slowly across a dark arctic sky, with a faint
-   star field behind for depth.
-═══════════════════════════════════════════════════════ */
-(function(){
-  const canvas=document.getElementById('constellation');
-  const ctx=canvas.getContext('2d');
-  let W,H,T=0;
-
-  // --- Stars (faint, few, cold-white) ---
-  let stars=[];
-  function initStars(){
-    stars=[];
-    for(let i=0;i<90;i++){
-      stars.push({
-        x:Math.random(),y:Math.random()*0.7,
-        r:Math.random()*0.9+0.2,
-        a:Math.random()*0.35+0.08,
-        da:(Math.random()-0.5)*0.003
-      });
-    }
-  }
-
-  function resize(){
-    W=canvas.width=window.innerWidth;
-    H=canvas.height=window.innerHeight;
-  }
-
-  // --- Aurora band definition ---
-  // Each band: vertical base position, amplitude, frequency, speed, colour stops, opacity
-  const BANDS=[
-    {yBase:0.28, amp:0.10, freq:1.2, spd:0.00018, stops:['rgba(255,61,171,0)',  'rgba(255,61,171,0.11)', 'rgba(230,0,143,0.18)', 'rgba(255,61,171,0.11)', 'rgba(255,61,171,0)'],  thick:0.18},
-    {yBase:0.38, amp:0.08, freq:0.9, spd:0.00024, stops:['rgba(255,105,200,0)', 'rgba(255,105,200,0.09)','rgba(240,80,180,0.15)','rgba(255,105,200,0.09)','rgba(255,105,200,0)'], thick:0.14},
-    {yBase:0.22, amp:0.07, freq:1.6, spd:0.00014, stops:['rgba(255,20,147,0)', 'rgba(255,20,147,0.08)', 'rgba(255,20,147,0.13)', 'rgba(255,20,147,0.08)', 'rgba(255,20,147,0)'],  thick:0.12},
-    {yBase:0.46, amp:0.06, freq:0.7, spd:0.00030, stops:['rgba(200,0,200,0)', 'rgba(200,0,200,0.07)','rgba(180,0,180,0.11)','rgba(200,0,200,0.07)','rgba(200,0,200,0)'],  thick:0.10},
-    {yBase:0.18, amp:0.05, freq:2.0, spd:0.00010, stops:['rgba(255,150,220,0)','rgba(255,150,220,0.06)','rgba(255,130,210,0.09)','rgba(255,150,220,0.06)','rgba(255,150,220,0)'],thick:0.09},
-  ];
-
-  // Per-band phase offset so they all start differently
-  BANDS.forEach((b,i)=>{ b.phase = i * 1.3; });
-
-  function drawAuroraBand(band){
-    const pts=80;
-    const time=T;
-    const yC=band.yBase*H;
-    const halfH=band.thick*H*0.5;
-
-    // Build the spine: a slowly undulating sine curve across the top portion
-    const spine=[];
-    for(let i=0;i<=pts;i++){
-      const px=(i/pts)*W;
-      const wave=
-        Math.sin(i/pts*Math.PI*2*band.freq + time*band.spd*1000 + band.phase)*band.amp*H
-        + Math.sin(i/pts*Math.PI*3.3*band.freq + time*band.spd*700 + band.phase*1.7)*band.amp*H*0.4
-        + Math.sin(i/pts*Math.PI*5.1*band.freq + time*band.spd*400 + band.phase*0.9)*band.amp*H*0.15;
-      spine.push({x:px, y:yC+wave});
-    }
-
-    // Draw the band as a thick curtain using vertical gradients at each segment
-    // Strategy: draw filled shape (top-edge to bottom-edge) column by column
-    // For performance, draw as a single filled path with top-curve then bottom-curve
-    const topEdge=spine.map(p=>({x:p.x, y:p.y - halfH}));
-    const botEdge=spine.map(p=>({x:p.x, y:p.y + halfH}));
-
-    // Use multiple overlapping vertical linear gradients in strips for the glow
-    const stripW=Math.ceil(W/40);
-    for(let s=0;s<40;s++){
-      const sx=s*stripW;
-      const idx=Math.min(Math.round(s/40*pts), pts);
-      const cy=spine[idx].y;
-      const grd=ctx.createLinearGradient(sx,cy-halfH*1.8,sx,cy+halfH*1.8);
-      band.stops.forEach((c,i)=>grd.addColorStop(i/(band.stops.length-1),c));
-      ctx.fillStyle=grd;
-      ctx.fillRect(sx,cy-halfH*1.8,stripW+1,halfH*3.6);
-    }
-
-    // Draw luminous spine line
-    ctx.save();
-    ctx.beginPath();
-    spine.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
-    ctx.strokeStyle='rgba(255,61,171,0.08)';
-    ctx.lineWidth=1.5;
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-
-    // Arctic night sky — very dark, slight green-black tint
-    const sky=ctx.createLinearGradient(0,0,0,H);
-    sky.addColorStop(0,'#fff0f8');
-    sky.addColorStop(0.5,'#ffe4f3');
-    sky.addColorStop(1,'#ffd0eb');
-    ctx.fillStyle=sky;
-    ctx.fillRect(0,0,W,H);
-
-    // Faint stars
-    stars.forEach(s=>{
-      s.a+=s.da;
-      if(s.a>0.42||s.a<0.06)s.da*=-1;
-      ctx.beginPath();
-      ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,200,230,${s.a})`;
-      ctx.fill();
-    });
-
-    // Horizon glow — faint green shimmer at the base of the aurora
-    const hgrd=ctx.createLinearGradient(0,H*0.55,0,H*0.72);
-    hgrd.addColorStop(0,'rgba(255,61,171,0.06)');
-    hgrd.addColorStop(1,'transparent');
-    ctx.fillStyle=hgrd;
-    ctx.fillRect(0,H*0.55,W,H*0.2);
-
-    // Draw aurora bands back to front (darkest/widest first)
-    // Sort by opacity so dimmer ones go first
-    BANDS.forEach(b=>drawAuroraBand(b));
-
-    // Subtle top atmospheric haze
-    const haze=ctx.createLinearGradient(0,0,0,H*0.15);
-    haze.addColorStop(0,'rgba(255,61,171,0.08)');
-    haze.addColorStop(1,'transparent');
-    ctx.fillStyle=haze;
-    ctx.fillRect(0,0,W,H*0.15);
-  }
-
-  // ── PERFORMANCE DETECTION ──────────────────────────
-  // On mobile/low-end devices: fewer bands, capped FPS, fewer strips
-  const IS_MOBILE = window.innerWidth <= 768 ||
-    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  const IS_LOW_END = IS_MOBILE && (
-    navigator.hardwareConcurrency <= 4 ||
-    typeof navigator.deviceMemory !== 'undefined' && navigator.deviceMemory <= 2
-  );
-
-  // Mobile: use only 3 bands (drop the faintest 2), fewer gradient strips
-  const ACTIVE_BANDS = IS_MOBILE ? BANDS.slice(0,3) : BANDS;
-  const STRIP_COUNT  = IS_LOW_END ? 20 : IS_MOBILE ? 28 : 40;
-
-  // Patch drawAuroraBand to use dynamic strip count
-  function drawAuroraBandAdaptive(band){
-    const pts = IS_MOBILE ? 50 : 80;
-    const time = T;
-    const yC   = band.yBase * H;
-    const halfH = band.thick * H * 0.5;
-
-    const spine = [];
-    for(let i=0;i<=pts;i++){
-      const px=(i/pts)*W;
-      const wave=
-        Math.sin(i/pts*Math.PI*2*band.freq + time*band.spd*1000 + band.phase)*band.amp*H
-        + Math.sin(i/pts*Math.PI*3.3*band.freq + time*band.spd*700 + band.phase*1.7)*band.amp*H*0.4
-        + Math.sin(i/pts*Math.PI*5.1*band.freq + time*band.spd*400 + band.phase*0.9)*band.amp*H*0.15;
-      spine.push({x:px, y:yC+wave});
-    }
-
-    const stripW = Math.ceil(W / STRIP_COUNT);
-    for(let s=0;s<STRIP_COUNT;s++){
-      const sx  = s * stripW;
-      const idx = Math.min(Math.round(s/STRIP_COUNT*pts), pts);
-      const cy  = spine[idx].y;
-      const grd = ctx.createLinearGradient(sx, cy-halfH*1.8, sx, cy+halfH*1.8);
-      band.stops.forEach((col,i)=>grd.addColorStop(i/(band.stops.length-1),col));
-      ctx.fillStyle=grd;
-      ctx.fillRect(sx, cy-halfH*1.8, stripW+1, halfH*3.6);
-    }
-
-    if(!IS_LOW_END){
-      ctx.save();
-      ctx.beginPath();
-      spine.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
-      ctx.strokeStyle='rgba(255,61,171,0.08)';
-      ctx.lineWidth=1.5;
-      ctx.stroke();
-      ctx.restore();
-    }
-  }
-
-  // Adaptive draw — uses reduced band set and strip count
-  function drawAdaptive(){
-    ctx.clearRect(0,0,W,H);
-
-    const sky=ctx.createLinearGradient(0,0,0,H);
-    sky.addColorStop(0,'#fff0f8');
-    sky.addColorStop(0.5,'#ffe4f3');
-    sky.addColorStop(1,'#ffd0eb');
-    ctx.fillStyle=sky;
-    ctx.fillRect(0,0,W,H);
-
-    // Skip individual star twinkle on low-end to save calls
-    const starLimit = IS_LOW_END ? 40 : stars.length;
-    for(let i=0;i<starLimit;i++){
-      const s=stars[i];
-      s.a+=s.da;
-      if(s.a>0.42||s.a<0.06)s.da*=-1;
-      ctx.beginPath();
-      ctx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2);
-      ctx.fillStyle=`rgba(255,200,230,${s.a})`;
-      ctx.fill();
-    }
-
-    const hgrd=ctx.createLinearGradient(0,H*0.55,0,H*0.72);
-    hgrd.addColorStop(0,'rgba(255,61,171,0.06)');
-    hgrd.addColorStop(1,'transparent');
-    ctx.fillStyle=hgrd;
-    ctx.fillRect(0,H*0.55,W,H*0.2);
-
-    ACTIVE_BANDS.forEach(b=>drawAuroraBandAdaptive(b));
-
-    if(!IS_MOBILE){
-      const haze=ctx.createLinearGradient(0,0,0,H*0.15);
-      haze.addColorStop(0,'rgba(255,61,171,0.08)');
-      haze.addColorStop(1,'transparent');
-      ctx.fillStyle=haze;
-      ctx.fillRect(0,0,W,H*0.15);
-    }
-  }
-
-  // ── FPS CAP ─────────────────────────────────────────
-  // Desktop: uncapped (~60fps)
-  // Mobile:  capped at 30fps
-  // Low-end: capped at 20fps
-  const TARGET_FPS = IS_LOW_END ? 20 : IS_MOBILE ? 30 : 60;
-  const FRAME_MS   = 1000 / TARGET_FPS;
-  let lastFrame = 0;
-
-  function animate(ts){
-    const now = ts || 0;
-    if(now - lastFrame < FRAME_MS){
-      requestAnimationFrame(animate);
-      return;
-    }
-    lastFrame = now;
-    T = now;
-    drawAdaptive();
-    requestAnimationFrame(animate);
-  }
-
-  resize();
-  initStars();
-  requestAnimationFrame(animate);
-  window.addEventListener('resize',()=>{
-    resize();
-    // Re-evaluate mobile status on resize (e.g. orientation change)
-  });
-})();
-
-/* ═══════════════════════════════════════════════════════
    NUMERIC EXPRESSION EVALUATOR
    Handles: decimals, fractions (3/4), e, pi, phi, sqrt, exp
 ═══════════════════════════════════════════════════════ */
@@ -1263,7 +1025,7 @@ function buildMatrixGrid(){
     html+=`<div class="aug-line"></div>`;
     // RHS cell
     const oldRHS=getCell(r,COLS);
-    html+=`<input class="matrix-cell rhs" id="mc_${r}_${COLS}" type="text" value="${oldRHS!==undefined?oldRHS:''}" placeholder="b" oninput="previewMatrix()">`;
+    html+=`<input class="matrix-cell rhs" id="mc_${r}_${COLS}" type="text" value="${oldRHS!==undefined?oldRHS:''}" placeholder="${String.fromCharCode(97+r)}" oninput="previewMatrix()">`;
     html+=`</div>`;
   }
   html+=`</div>`;
@@ -1332,10 +1094,48 @@ function readMatrix(){
 /* ═══════════════════════════════════════════════════════
    RENDER AUGMENTED MATRIX (HTML)
 ═══════════════════════════════════════════════════════ */
+/* ── GCD helper ── */
+function gcd(a,b){a=Math.abs(Math.round(a));b=Math.abs(Math.round(b));while(b){[a,b]=[b,a%b];}return a;}
+
+/* ── Convert decimal → fraction string e.g. 0.3333 → "1/3" ── */
+function toFrac(n){
+  if(Math.abs(n)<1e-9) return '0';
+  if(Math.abs(n-Math.round(n))<1e-9) return String(Math.round(n));
+  // Stern-Brocot / continued fraction approximation up to denom 1000
+  const sign = n < 0 ? -1 : 1;
+  n = Math.abs(n);
+  let bestNum=1, bestDen=1, bestErr=Math.abs(n-1);
+  for(let d=1; d<=1000; d++){
+    const num = Math.round(n*d);
+    const err = Math.abs(n - num/d);
+    if(err < bestErr){ bestErr=err; bestNum=num; bestDen=d; }
+    if(err < 1e-9) break;
+  }
+  if(bestErr > 1e-6){
+    // Couldn't find a clean fraction — show decimal (4 sig figs)
+    return (sign*n).toFixed(4).replace(/\.?0+$/,'');
+  }
+  const g = gcd(bestNum, bestDen);
+  bestNum = Math.round(bestNum/g);
+  bestDen = Math.round(bestDen/g);
+  if(bestDen === 1) return String(sign * bestNum);
+  return `${sign<0?'-':''}${bestNum}/${bestDen}`;
+}
+
+/* fmtN — used inside matrices & step descriptions (plain text fractions) */
 function fmtN(n){
-  if(Math.abs(n)<1e-9)return'0';
-  if(Math.abs(n-Math.round(n))<1e-9)return String(Math.round(n));
-  return n.toFixed(4).replace(/\.?0+$/,'');
+  return toFrac(n);
+}
+
+/* fmtFrac — used in answer banners (renders as styled HTML fraction) */
+function fmtFrac(n){
+  if(Math.abs(n)<1e-9) return '<span class="frac-whole">0</span>';
+  if(Math.abs(n-Math.round(n))<1e-9) return `<span class="frac-whole">${Math.round(n)}</span>`;
+  const raw = toFrac(n);
+  if(!raw.includes('/')) return `<span class="frac-whole">${raw}</span>`;
+  const neg = raw.startsWith('-');
+  const parts = raw.replace('-','').split('/');
+  return `<span class="frac-html">${neg?'−':''}${parts[0]}<span class="frac-bar"></span>${parts[1]}</span>`;
 }
 
 function renderAugMatrix(mat,pivotCol,modRows,size='normal'){
@@ -1353,7 +1153,7 @@ function renderAugMatrix(mat,pivotCol,modRows,size='normal'){
   for(let c=0;c<nCols;c++){
     // Augment separator
     if(c===varCols){
-      html+=`<div style="width:2px;background:linear-gradient(180deg,transparent,rgba(0,212,255,0.4),transparent);margin:0 6px;align-self:stretch;border-radius:1px;"></div>`;
+      html+=`<div style="width:2px;background:linear-gradient(180deg,transparent,rgba(255,110,180,0.5),transparent);margin:0 6px;align-self:stretch;border-radius:1px;"></div>`;
     }
     html+=`<div style="display:flex;flex-direction:column;gap:${gap}px;">`;
     for(let r=0;r<nRows;r++){
@@ -1573,7 +1373,7 @@ function applyResults(res){
 
   if(solutionType==='unique'){
     Object.entries(solution).forEach(([k,v])=>{
-      varsDiv.innerHTML+=`<div class="sol-var"><div class="sol-var-name">${k}</div><div class="sol-var-val">${fmtN(v)}</div></div>`;
+      varsDiv.innerHTML+=`<div class="sol-var"><div class="sol-var-name">${k}</div><div class="sol-var-val">${fmtFrac(v)}</div></div>`;
     });
   } else if(solutionType==='inconsistent'){
     varsDiv.innerHTML=`<div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--error);">No Solution</div>`;
@@ -1637,7 +1437,7 @@ function buildModal(){
 
   if(solutionType==='unique'){
     Object.entries(solution).forEach(([k,v])=>{
-      h+=`<div class="abm-var"><div class="abm-var-name">${k}</div><div class="abm-var-val">${fmtN(v)}</div></div>`;
+      h+=`<div class="abm-var"><div class="abm-var-name">${k}</div><div class="abm-var-val">${fmtFrac(v)}</div></div>`;
     });
   } else {
     h+=`<div class="abm-var"><div class="abm-var-val" style="color:${solutionType==='inconsistent'?'var(--error)':'var(--gold);font-size:1.1rem'}">${solutionType==='inconsistent'?'Inconsistent — No Solution':'Infinitely Many Solutions'}</div></div>`;
@@ -1701,7 +1501,7 @@ function buildModal(){
         <div class="mstep-title">Reading the Solution</div></div>
       <div class="mstep-body">
         Each row now reads: <code>1·xᵢ = value</code>. Reading directly:<br><br>
-        ${Object.entries(solution).map(([k,v])=>`<code>${k} = ${fmtN(v)}</code>`).join('<br>')}
+        ${Object.entries(solution).map(([k,v])=>`<code>${k} = ${toFrac(v)}</code>`).join('<br>')}
         <br><br><span class="gr">✓ Unique solution found.</span>
       </div>
     </div>`;
@@ -1717,7 +1517,7 @@ function buildModal(){
       <strong>${steps.length} elementary row operation${steps.length!==1?'s':''}</strong> (${steps.filter(s=>s.type==='swap').length} swaps,
       ${steps.filter(s=>s.type==='scale').length} scalings, ${steps.filter(s=>s.type==='replace').length} replacements).
       Matrix rank = <strong>${rank}</strong>.
-      ${solutionType==='unique'?`The unique solution is: ${Object.entries(solution).map(([k,v])=>`<strong>${k} = ${fmtN(v)}</strong>`).join(', ')}.`:''}
+      ${solutionType==='unique'?`The unique solution is: ${Object.entries(solution).map(([k,v])=>`<strong>${k} = ${toFrac(v)}</strong>`).join(', ')}.`:''}
       ${solutionType==='inconsistent'?'The system has <strong>no solution</strong> — it is inconsistent.':''}
       ${solutionType==='infinite'?`The system has <strong>infinitely many solutions</strong> with ${nVars-rank} free variable(s).`:''}
     </div>
